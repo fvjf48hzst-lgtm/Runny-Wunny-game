@@ -85,6 +85,7 @@
         justify-content: center;
 
         touch-action: manipulation;
+
         cursor: pointer;
     }
 
@@ -169,6 +170,7 @@
             0 0 12px rgba(0, 120, 255, 0.18);
 
         cursor: pointer;
+
         touch-action: manipulation;
     }
 
@@ -484,6 +486,17 @@ function resetGame() {
 
     enemyTrailActive = true;
 
+    /*
+       The enemy starts with its trail ON, so its
+       first trail begins exactly where the enemy starts.
+    */
+    enemyTrail = [
+        {
+            x: enemy.x,
+            y: enemy.y
+        }
+    ];
+
     enemyTrailTimer = 0;
 
     enemyTrailNextChange =
@@ -790,12 +803,17 @@ game.addEventListener(
                 dy * dy
             );
 
-        /* Only count taps, not swipes. */
+
+        /*
+           Only count taps, not swipes.
+        */
+
         if (
             distance >= SWIPE_DISTANCE
         ) {
             return;
         }
+
 
         tapCount++;
 
@@ -827,12 +845,11 @@ game.addEventListener(
                 laserActive;
 
 
-            /* =============================================
-               LASER TURNED ON
-
-               Start a completely new trail at the exact
-               position of the player at this moment.
-               ============================================= */
+            /*
+               LASER ON:
+               Completely new trail starting at the
+               player's exact current position.
+            */
 
             if (
                 laserActive
@@ -850,11 +867,10 @@ game.addEventListener(
             }
 
 
-            /* =============================================
-               LASER TURNED OFF
-
-               Completely erase the trail immediately.
-               ============================================= */
+            /*
+               LASER OFF:
+               Completely erase the entire blue trail.
+            */
 
             else {
 
@@ -1227,6 +1243,7 @@ function checkTrailCollision(
 
 
     return false;
+
 }
 
 
@@ -1463,6 +1480,40 @@ function updateEnemyTrail(dt) {
 
         enemyTrailNextChange =
             randomEnemyTrailTime();
+
+
+        /*
+           RED TRAIL ON:
+           Start a completely new trail at the enemy's
+           exact current position.
+        */
+
+        if (
+            enemyTrailActive
+        ) {
+
+            enemyTrail = [
+
+                {
+                    x: enemy.x,
+                    y: enemy.y
+                }
+
+            ];
+
+        }
+
+
+        /*
+           RED TRAIL OFF:
+           Completely erase the old red trail.
+        */
+
+        else {
+
+            enemyTrail = [];
+
+        }
 
     }
 
