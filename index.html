@@ -2,2615 +2,1381 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-
 <meta name="viewport"
-      content="width=device-width,
-               initial-scale=1.0,
-               maximum-scale=1.0,
-               user-scalable=no">
-
-<title>Neon Light Cycles</title>
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Neon Light Cycle</title>
 
 <style>
+    * {
+        box-sizing: border-box;
+        -webkit-tap-highlight-color: transparent;
+    }
+
+    html, body {
+        margin: 0;
+        width: 100%;
+        height: 100%;
+        overflow: hidden;
+        background: #020611;
+        font-family: Arial, Helvetica, sans-serif;
+        touch-action: none;
+        user-select: none;
+    }
+
+    body {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    #game {
+        position: relative;
+        width: 100vw;
+        height: 100vh;
+        overflow: hidden;
+        background:
+            radial-gradient(circle at 50% 45%,
+                rgba(0, 120, 255, 0.16),
+                transparent 48%),
+            radial-gradient(circle at 20% 80%,
+                rgba(0, 80, 255, 0.12),
+                transparent 40%),
+            #020611;
+    }
+
+    canvas {
+        position: absolute;
+        inset: 0;
+        width: 100%;
+        height: 100%;
+        display: block;
+    }
+
+    #pauseButton {
+        position: absolute;
+        top: 18px;
+        left: 18px;
+        z-index: 10;
+
+        width: 48px;
+        height: 48px;
+
+        border: 1px solid rgba(80, 190, 255, 0.8);
+        border-radius: 10px;
+
+        background: rgba(0, 10, 25, 0.78);
+        color: #75d9ff;
+
+        font-size: 24px;
+        font-weight: bold;
+
+        box-shadow:
+            0 0 10px rgba(0, 150, 255, 0.35),
+            inset 0 0 10px rgba(0, 100, 255, 0.12);
+
+        display: flex;
+        align-items: center;
+        justify-content: center;
+
+        touch-action: manipulation;
+    }
+
+    #pauseMenu {
+        position: absolute;
+        inset: 0;
+        z-index: 20;
+
+        display: none;
+        align-items: center;
+        justify-content: center;
+
+        background: rgba(0, 3, 12, 0.72);
+        backdrop-filter: blur(5px);
+    }
+
+    #pausePanel {
+        width: min(320px, 82vw);
+        padding: 28px;
+
+        border: 1px solid rgba(70, 190, 255, 0.7);
+        border-radius: 16px;
+
+        background:
+            linear-gradient(
+                145deg,
+                rgba(3, 17, 38, 0.96),
+                rgba(0, 7, 18, 0.96)
+            );
+
+        box-shadow:
+            0 0 25px rgba(0, 130, 255, 0.25),
+            inset 0 0 25px rgba(0, 100, 255, 0.08);
 
-* {
-    box-sizing: border-box;
-    -webkit-tap-highlight-color: transparent;
-}
+        text-align: center;
+        color: white;
+    }
 
-html,
-body {
-    margin: 0;
-    width: 100%;
-    height: 100%;
-
-    overflow: hidden;
-
-    background: #02040d;
-
-    font-family:
-        Arial,
-        Helvetica,
-        sans-serif;
-
-    touch-action: none;
-}
-
-body {
-
-    display: flex;
-
-    justify-content: center;
-
-    align-items: center;
-}
-
-#gameWrap {
-
-    position: relative;
-
-    width: 100vw;
-    height: 100vh;
-
-    overflow: hidden;
-
-    background: #02040d;
-}
-
-canvas {
-
-    position: absolute;
-
-    left: 0;
-    top: 0;
-
-    width: 100%;
-    height: 100%;
-
-    display: block;
-
-    touch-action: none;
-}
-
-
-/* ================================
-   HUD
-================================ */
-
-#hud {
-
-    position: absolute;
-
-    top: 15px;
-    left: 0;
-
-    width: 100%;
-
-    padding: 0 18px;
-
-    display: flex;
-
-    justify-content: space-between;
-
-    align-items: center;
-
-    color: white;
-
-    font-weight: bold;
-
-    font-size: 16px;
-
-    text-shadow:
-        0 0 5px #fff,
-        0 0 12px #00eaff;
-
-    pointer-events: none;
-
-    z-index: 10;
-}
-
-
-/* ================================
-   PAUSE BUTTON
-================================ */
-
-#pauseButton {
-
-    position: absolute;
-
-    right: 18px;
-    top: 50px;
-
-    width: 48px;
-    height: 48px;
-
-    border: 2px solid #00eaff;
-
-    border-radius: 10px;
-
-    background:
-        rgba(0, 10, 25, .75);
-
-    color: white;
-
-    font-size: 21px;
-
-    font-weight: bold;
-
-    box-shadow:
-        0 0 10px #00eaff;
-
-    z-index: 30;
-
-    touch-action: manipulation;
-}
-
-
-/* ================================
-   MOBILE CONTROLS
-================================ */
-
-#mobileControls {
-
-    position: absolute;
-
-    left: 0;
-    right: 0;
-    bottom: 25px;
-
-    display: flex;
-
-    justify-content:
-        space-between;
-
-    padding:
-        0 25px;
-
-    pointer-events: none;
-
-    z-index: 20;
-}
-
-.turnButton {
-
-    width: 85px;
-    height: 85px;
-
-    border-radius: 18px;
-
-    border:
-        3px solid #00eaff;
-
-    background:
-        rgba(0, 15, 35, .7);
-
-    color: #00eaff;
-
-    font-size: 36px;
-
-    font-weight: bold;
-
-    box-shadow:
-        0 0 15px #00eaff,
-        inset 0 0 15px
-        rgba(0,234,255,.2);
-
-    pointer-events: auto;
-
-    user-select: none;
-
-    -webkit-user-select: none;
-
-    touch-action: none;
-}
-
-.turnButton:active {
-
-    transform: scale(.92);
-
-    background:
-        rgba(0,234,255,.3);
-}
-
-#leftButton {
-
-    border-color:
-        #00eaff;
-
-    color:
-        #00eaff;
-}
-
-#rightButton {
-
-    border-color:
-        #ff2bd6;
-
-    color:
-        #ff2bd6;
-
-    box-shadow:
-        0 0 15px #ff2bd6,
-        inset 0 0 15px
-        rgba(255,43,214,.2);
-}
-
-
-/* ================================
-   MENUS
-================================ */
-
-.menu {
-
-    position: absolute;
-
-    inset: 0;
-
-    display: none;
-
-    justify-content: center;
-
-    align-items: center;
-
-    background:
-        rgba(0,0,10,.78);
-
-    z-index: 50;
-}
-
-.menuBox {
-
-    width:
-        min(440px, 88vw);
-
-    padding: 32px;
-
-    text-align: center;
-
-    color: white;
-
-    border:
-        2px solid #00eaff;
-
-    border-radius: 20px;
-
-    background:
-        linear-gradient(
-            145deg,
-            #07142e,
-            #020711
-        );
-
-    box-shadow:
-        0 0 20px #00eaff,
-        inset 0 0 30px
-        rgba(0,234,255,.08);
-}
-
-.menuBox h1 {
-
-    margin:
-        0 0 12px;
-
-    font-size:
-        clamp(32px, 8vw, 52px);
-
-    color:
-        #00eaff;
-
-    text-shadow:
-        0 0 10px #00eaff,
-        0 0 25px #00eaff;
-}
-
-.menuBox p {
-
-    color:
-        #d9faff;
-
-    line-height:
-        1.5;
-
-    margin:
-        10px 0 25px;
-}
-
-.menuButton {
-
-    width: 100%;
-
-    padding: 14px;
-
-    margin-top: 10px;
-
-    border:
-        2px solid #00eaff;
-
-    border-radius: 10px;
-
-    background:
-        #071f3d;
-
-    color: white;
-
-    font-size: 17px;
-
-    font-weight: bold;
-
-    box-shadow:
-        0 0 10px
-        rgba(0,234,255,.4);
-
-    touch-action:
-        manipulation;
-}
-
-.menuButton:active {
-
-    transform:
-        scale(.97);
-
-    background:
-        #0d3c68;
-}
-
-
-/* ================================
-   TITLE SCREEN
-================================ */
-
-#startMenu {
-
-    display: flex;
-}
-
-
-/* ================================
-   SMALL SCREENS
-================================ */
-
-@media(max-width:600px) {
-
-    .turnButton {
-
-        width: 72px;
-        height: 72px;
-
+    #pausePanel h1 {
+        margin: 0 0 8px;
+        color: #72d8ff;
         font-size: 30px;
+        letter-spacing: 3px;
+        text-shadow: 0 0 12px rgba(60, 190, 255, 0.8);
     }
 
-    #mobileControls {
-
-        padding:
-            0 15px;
-
-        bottom: 15px;
-    }
-
-    #hud {
-
+    #pausePanel p {
+        margin: 0 0 22px;
+        color: #8da6c2;
         font-size: 14px;
     }
-}
 
+    .menuButton {
+        width: 100%;
+        min-height: 48px;
+        margin-top: 10px;
+
+        border: 1px solid rgba(70, 190, 255, 0.65);
+        border-radius: 10px;
+
+        background: rgba(0, 35, 70, 0.7);
+        color: #9ce5ff;
+
+        font-size: 16px;
+        font-weight: bold;
+        letter-spacing: 1px;
+
+        box-shadow: 0 0 12px rgba(0, 120, 255, 0.18);
+    }
+
+    .menuButton:active {
+        transform: scale(0.97);
+        background: rgba(0, 65, 115, 0.8);
+    }
+
+    #message {
+        position: absolute;
+        left: 50%;
+        top: 50%;
+        transform: translate(-50%, -50%);
+
+        z-index: 8;
+
+        color: white;
+        text-align: center;
+
+        pointer-events: none;
+
+        opacity: 0;
+        transition: opacity 0.2s;
+    }
+
+    #message h2 {
+        margin: 0;
+        font-size: 34px;
+        letter-spacing: 4px;
+        text-shadow: 0 0 15px #48caff;
+    }
+
+    #message p {
+        margin-top: 8px;
+        color: #9db8d0;
+        font-size: 14px;
+    }
 </style>
 </head>
 
-
 <body>
 
-<div id="gameWrap">
+<div id="game">
+    <canvas id="canvas"></canvas>
 
-<canvas id="game"></canvas>
+    <button id="pauseButton" aria-label="Pause">Ⅱ</button>
 
-
-<div id="hud">
-
-    <div id="scoreText">
-        SCORE: 0
+    <div id="message">
+        <h2 id="messageTitle"></h2>
+        <p id="messageText"></p>
     </div>
 
-    <div id="aliveText">
-        RIDERS: 4
+    <div id="pauseMenu">
+        <div id="pausePanel">
+            <h1>PAUSED</h1>
+            <p>Light Cycle Arena</p>
+
+            <button class="menuButton" id="resumeButton">
+                RESUME
+            </button>
+
+            <button class="menuButton" id="restartButton">
+                RESTART
+            </button>
+        </div>
     </div>
-
 </div>
-
-
-<button id="pauseButton">
-    Ⅱ
-</button>
-
-
-<!-- MOBILE CONTROLS -->
-
-<div id="mobileControls">
-
-    <button
-        class="turnButton"
-        id="leftButton">
-        ◀
-    </button>
-
-    <button
-        class="turnButton"
-        id="rightButton">
-        ▶
-    </button>
-
-</div>
-
-
-<!-- START MENU -->
-
-<div
-    class="menu"
-    id="startMenu">
-
-    <div class="menuBox">
-
-        <h1>
-            NEON<br>
-            CYCLES
-        </h1>
-
-        <p>
-            Drive through the arena,
-            leave a glowing trail,
-            and force the other riders
-            to crash.
-        </p>
-
-        <button
-            class="menuButton"
-            id="startButton">
-
-            START
-
-        </button>
-
-    </div>
-
-</div>
-
-
-<!-- PAUSE MENU -->
-
-<div
-    class="menu"
-    id="pauseMenu">
-
-    <div class="menuBox">
-
-        <h1>
-            PAUSED
-        </h1>
-
-        <button
-            class="menuButton"
-            id="resumeButton">
-
-            RESUME
-
-        </button>
-
-        <button
-            class="menuButton"
-            id="restartButton">
-
-            RESTART
-
-        </button>
-
-    </div>
-
-</div>
-
-
-<!-- DEATH MENU -->
-
-<div
-    class="menu"
-    id="deathMenu">
-
-    <div class="menuBox">
-
-        <h1>
-            CRASHED
-        </h1>
-
-        <p id="deathMessage">
-            Your cycle crashed.
-        </p>
-
-        <button
-            class="menuButton"
-            id="retryButton">
-
-            TRY AGAIN
-
-        </button>
-
-    </div>
-
-</div>
-
-
-<!-- WIN MENU -->
-
-<div
-    class="menu"
-    id="winMenu">
-
-    <div class="menuBox">
-
-        <h1>
-            VICTORY
-        </h1>
-
-        <p>
-            You were the last rider
-            standing.
-        </p>
-
-        <button
-            class="menuButton"
-            id="playAgainButton">
-
-            PLAY AGAIN
-
-        </button>
-
-    </div>
-
-</div>
-
-</div>
-
 
 <script>
+"use strict";
 
 /* =========================================================
-   CANVAS
-========================================================= */
+   LIGHT CYCLE
+   ========================================================= */
 
-const canvas =
-    document.getElementById("game");
+const canvas = document.getElementById("canvas");
+const ctx = canvas.getContext("2d");
 
-const ctx =
-    canvas.getContext("2d");
+const game = document.getElementById("game");
 
+const pauseButton = document.getElementById("pauseButton");
+const pauseMenu = document.getElementById("pauseMenu");
+const resumeButton = document.getElementById("resumeButton");
+const restartButton = document.getElementById("restartButton");
 
-let W = 1280;
-let H = 720;
-
-
-function resize() {
-
-    W =
-        window.innerWidth;
-
-    H =
-        window.innerHeight;
-
-    canvas.width =
-        W;
-
-    canvas.height =
-        H;
-
-    arena.width =
-        W;
-
-    arena.height =
-        H;
-
-}
+const message = document.getElementById("message");
+const messageTitle = document.getElementById("messageTitle");
+const messageText = document.getElementById("messageText");
 
 
-window.addEventListener(
-    "resize",
-    resize
-);
+/* =========================================================
+   ARENA SETTINGS
+   ========================================================= */
+
+const GRID_SIZE = 25;
+
+let width = 0;
+let height = 0;
+
+let arenaSize = 0;
+let arenaLeft = 0;
+let arenaTop = 0;
+
+let cellSize = 0;
 
 
 /* =========================================================
    GAME SETTINGS
-========================================================= */
+   ========================================================= */
 
-const BASE_SPEED = 4.8;
+const PLAYER_SPEED = 7.5;
+const ENEMY_SPEED = 6.5;
 
-const TURN_SPEED =
-    Math.PI / 2;
+const PLAYER_COLOR = "#65d9ff";
+const PLAYER_CORE = "#e7faff";
 
-const TRAIL_SPACING = 5;
+const ENEMY_COLOR = "#ff304f";
+const ENEMY_CORE = "#fff0f3";
 
-const ARENA_MARGIN = 45;
+const GRID_COLOR = "#075ea8";
 
-const AI_COUNT = 3;
+const TRAIL_WIDTH = 5;
 
-
-let gameState = "menu";
-
-let score = 0;
-
-let elapsed = 0;
-
-let shake = 0;
-
-
-/* =========================================================
-   ARENA
-========================================================= */
-
-const arena = {
-
-    width: W,
-
-    height: H
-
+const DIRECTIONS = {
+    UP:    { x: 0,  y: -1 },
+    DOWN:  { x: 0,  y: 1 },
+    LEFT:  { x: -1, y: 0 },
+    RIGHT: { x: 1,  y: 0 }
 };
 
 
 /* =========================================================
-   RIDERS
-========================================================= */
+   STATE
+   ========================================================= */
 
-let riders = [];
+let paused = false;
+let gameOver = false;
 
+let player;
+let enemy;
 
-/* =========================================================
-   PARTICLES
-========================================================= */
+let playerTrail = [];
+let enemyTrail = [];
 
-let particles = [];
+let laserActive = false;
 
-
-/* =========================================================
-   COLORS
-========================================================= */
-
-const colors = {
-
-    player: "#00eaff",
-
-    ai1: "#ff2bd6",
-
-    ai2: "#ffe600",
-
-    ai3: "#8b5cff"
-
-};
+let lastTime = 0;
 
 
 /* =========================================================
-   CREATE PLAYER
-========================================================= */
+   PLAYER
+   ========================================================= */
 
 function createPlayer() {
-
     return {
+        x: 3,
+        y: 12,
 
-        x: W * .25,
+        dir: "RIGHT",
+        nextDir: "RIGHT",
 
-        y: H * .5,
+        color: PLAYER_COLOR,
+        core: PLAYER_CORE,
 
-        angle: 0,
+        speed: PLAYER_SPEED,
 
-        speed: BASE_SPEED,
+        trailEnabled: false,
 
-        color: colors.player,
-
-        alive: true,
-
-        trail: [],
-
-        lastTrailX:
-            W * .25,
-
-        lastTrailY:
-            H * .5,
-
-        turnLeft: false,
-
-        turnRight: false,
-
-        ai: false,
-
-        aiTimer: 0,
-
-        targetTurn: 0
-
+        distance: 0
     };
-
 }
 
 
 /* =========================================================
-   CREATE AI
-========================================================= */
+   ENEMY
+   ========================================================= */
 
-function createAI(
-    x,
-    y,
-    angle,
-    color
-) {
-
+function createEnemy() {
     return {
+        x: 21,
+        y: 12,
 
-        x,
+        dir: "LEFT",
+        nextDir: "LEFT",
 
-        y,
+        color: ENEMY_COLOR,
+        core: ENEMY_CORE,
 
-        angle,
+        speed: ENEMY_SPEED,
 
-        speed:
-            BASE_SPEED,
-
-        color,
-
-        alive: true,
-
-        trail: [],
-
-        lastTrailX: x,
-
-        lastTrailY: y,
-
-        turnLeft: false,
-
-        turnRight: false,
-
-        ai: true,
-
-        aiTimer:
-            Math.random() * 100,
-
-        targetTurn: 0
-
+        distance: 0
     };
-
 }
 
 
 /* =========================================================
-   RESET GAME
-========================================================= */
+   RESET
+   ========================================================= */
 
 function resetGame() {
 
-    riders = [];
+    player = createPlayer();
+    enemy = createEnemy();
 
-    particles = [];
+    playerTrail = [];
+    enemyTrail = [];
 
-    elapsed = 0;
+    laserActive = false;
 
-    score = 0;
+    paused = false;
+    gameOver = false;
 
-    shake = 0;
+    hideMessage();
+
+    pauseMenu.style.display = "none";
+
+    lastTime = performance.now();
+}
 
 
-    /* player */
+/* =========================================================
+   RESIZE
+   ========================================================= */
 
-    riders.push(
-        createPlayer()
+function resize() {
+
+    const dpr = Math.min(window.devicePixelRatio || 1, 2);
+
+    width = window.innerWidth;
+    height = window.innerHeight;
+
+    canvas.width = width * dpr;
+    canvas.height = height * dpr;
+
+    canvas.style.width = width + "px";
+    canvas.style.height = height + "px";
+
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+
+    arenaSize = Math.min(width, height) * 0.82;
+
+    arenaSize = Math.max(
+        260,
+        Math.min(arenaSize, Math.min(width, height) - 50)
     );
 
+    arenaLeft = (width - arenaSize) / 2;
+    arenaTop = (height - arenaSize) / 2;
 
-    /* AI */
+    cellSize = arenaSize / GRID_SIZE;
+}
 
-    riders.push(
-        createAI(
-            W * .72,
-            H * .25,
-            Math.PI,
-            colors.ai1
-        )
+window.addEventListener("resize", resize);
+
+
+/* =========================================================
+   GRID POSITION
+   ========================================================= */
+
+function gridToPixel(x, y) {
+
+    return {
+        x: arenaLeft + x * cellSize,
+        y: arenaTop + y * cellSize
+    };
+}
+
+
+/* =========================================================
+   VALID DIRECTION
+   ========================================================= */
+
+function isOpposite(a, b) {
+
+    return (
+        (a === "UP" && b === "DOWN") ||
+        (a === "DOWN" && b === "UP") ||
+        (a === "LEFT" && b === "RIGHT") ||
+        (a === "RIGHT" && b === "LEFT")
     );
+}
 
 
-    riders.push(
-        createAI(
-            W * .72,
-            H * .75,
-            Math.PI,
-            colors.ai2
-        )
-    );
+/* =========================================================
+   CHANGE DIRECTION
+   ========================================================= */
+
+function changePlayerDirection(newDirection) {
+
+    if (paused || gameOver) return;
+
+    if (isOpposite(player.dir, newDirection)) {
+        return;
+    }
+
+    player.nextDir = newDirection;
+}
 
 
-    riders.push(
-        createAI(
-            W * .50,
-            H * .25,
-            Math.PI / 2,
-            colors.ai3
-        )
-    );
+/* =========================================================
+   SWIPE CONTROLS
+   ========================================================= */
+
+let touchStartX = 0;
+let touchStartY = 0;
+let touchStartTime = 0;
+
+const SWIPE_DISTANCE = 25;
+const SWIPE_TIME = 700;
+
+game.addEventListener("pointerdown", function(event) {
+
+    if (
+        event.target === pauseButton ||
+        event.target.closest("#pauseMenu")
+    ) {
+        return;
+    }
+
+    touchStartX = event.clientX;
+    touchStartY = event.clientY;
+    touchStartTime = performance.now();
+});
 
 
-    /* initial trail */
+game.addEventListener("pointerup", function(event) {
 
-    for (const rider of riders) {
+    if (
+        event.target === pauseButton ||
+        event.target.closest("#pauseMenu")
+    ) {
+        return;
+    }
 
-        rider.trail.push({
+    if (paused || gameOver) return;
 
-            x: rider.x,
+    const dx = event.clientX - touchStartX;
+    const dy = event.clientY - touchStartY;
 
-            y: rider.y
+    const distance = Math.sqrt(dx * dx + dy * dy);
+    const elapsed = performance.now() - touchStartTime;
 
-        });
+    if (distance < SWIPE_DISTANCE) return;
+    if (elapsed > SWIPE_TIME) return;
+
+    if (Math.abs(dx) > Math.abs(dy)) {
+
+        if (dx > 0) {
+            changePlayerDirection("RIGHT");
+        } else {
+            changePlayerDirection("LEFT");
+        }
+
+    } else {
+
+        if (dy > 0) {
+            changePlayerDirection("DOWN");
+        } else {
+            changePlayerDirection("UP");
+        }
+    }
+});
+
+
+/* =========================================================
+   DOUBLE TAP = LASER
+   ========================================================= */
+
+let lastTap = 0;
+
+game.addEventListener("pointerup", function(event) {
+
+    if (
+        event.target === pauseButton ||
+        event.target.closest("#pauseMenu")
+    ) {
+        return;
+    }
+
+    if (paused || gameOver) return;
+
+    const now = performance.now();
+
+    if (now - lastTap < 320) {
+
+        laserActive = !laserActive;
+        player.trailEnabled = laserActive;
 
     }
 
-
-    updateHUD();
-
-}
+    lastTap = now;
+});
 
 
 /* =========================================================
-   START
-========================================================= */
+   KEYBOARD SUPPORT
+   ========================================================= */
 
-function startGame() {
+window.addEventListener("keydown", function(event) {
 
-    resetGame();
+    if (event.key === "ArrowUp" || event.key.toLowerCase() === "w") {
+        changePlayerDirection("UP");
+    }
 
-    gameState =
-        "playing";
+    if (event.key === "ArrowDown" || event.key.toLowerCase() === "s") {
+        changePlayerDirection("DOWN");
+    }
 
-    hideMenus();
+    if (event.key === "ArrowLeft" || event.key.toLowerCase() === "a") {
+        changePlayerDirection("LEFT");
+    }
 
-}
+    if (event.key === "ArrowRight" || event.key.toLowerCase() === "d") {
+        changePlayerDirection("RIGHT");
+    }
+
+    if (event.key === " " || event.key.toLowerCase() === "p") {
+        togglePause();
+    }
+
+    if (event.key === "l") {
+        laserActive = !laserActive;
+        player.trailEnabled = laserActive;
+    }
+});
 
 
 /* =========================================================
-   MENUS
-========================================================= */
-
-const startMenu =
-    document.getElementById(
-        "startMenu"
-    );
-
-const pauseMenu =
-    document.getElementById(
-        "pauseMenu"
-    );
-
-const deathMenu =
-    document.getElementById(
-        "deathMenu"
-    );
-
-const winMenu =
-    document.getElementById(
-        "winMenu"
-    );
-
-
-function hideMenus() {
-
-    startMenu.style.display =
-        "none";
-
-    pauseMenu.style.display =
-        "none";
-
-    deathMenu.style.display =
-        "none";
-
-    winMenu.style.display =
-        "none";
-
-}
-
-
-document.getElementById(
-    "startButton"
-).onclick =
-    startGame;
-
-
-document.getElementById(
-    "retryButton"
-).onclick =
-    startGame;
-
-
-document.getElementById(
-    "playAgainButton"
-).onclick =
-    startGame;
-
-
-document.getElementById(
-    "restartButton"
-).onclick =
-    startGame;
-
-
-document.getElementById(
-    "resumeButton"
-).onclick =
-    () => {
-
-        gameState =
-            "playing";
-
-        pauseMenu.style.display =
-            "none";
-
-    };
-
-
-document.getElementById(
-    "pauseButton"
-).onclick =
-    togglePause;
-
+   PAUSE
+   ========================================================= */
 
 function togglePause() {
 
-    if (
-        gameState === "playing"
-    ) {
+    if (gameOver) return;
 
-        gameState =
-            "paused";
+    paused = !paused;
 
-        pauseMenu.style.display =
-            "flex";
+    pauseMenu.style.display = paused ? "flex" : "none";
 
+    if (!paused) {
+        lastTime = performance.now();
     }
-
-    else if (
-        gameState === "paused"
-    ) {
-
-        gameState =
-            "playing";
-
-        pauseMenu.style.display =
-            "none";
-
-    }
-
 }
+
+
+pauseButton.addEventListener("click", function(event) {
+
+    event.stopPropagation();
+    togglePause();
+
+});
+
+
+resumeButton.addEventListener("click", function() {
+
+    paused = false;
+
+    pauseMenu.style.display = "none";
+
+    lastTime = performance.now();
+
+});
+
+
+restartButton.addEventListener("click", function() {
+
+    resetGame();
+
+});
 
 
 /* =========================================================
-   INPUT
-========================================================= */
+   MOVE CYCLE
+   ========================================================= */
 
-const leftButton =
-    document.getElementById(
-        "leftButton"
-    );
+function moveCycle(cycle, trail, dt) {
 
-const rightButton =
-    document.getElementById(
-        "rightButton"
-    );
+    cycle.dir = cycle.nextDir;
 
+    const direction = DIRECTIONS[cycle.dir];
 
-function leftDown(e) {
+    cycle.x += direction.x * cycle.speed * dt;
+    cycle.y += direction.y * cycle.speed * dt;
 
-    e.preventDefault();
+    cycle.distance += cycle.speed * dt;
 
     if (
-        riders[0]
+        cycle.x < 0 ||
+        cycle.x > GRID_SIZE ||
+        cycle.y < 0 ||
+        cycle.y > GRID_SIZE
     ) {
-
-        riders[0].turnLeft =
-            true;
-
-    }
-
-}
-
-
-function leftUp(e) {
-
-    e.preventDefault();
-
-    if (
-        riders[0]
-    ) {
-
-        riders[0].turnLeft =
-            false;
-
-    }
-
-}
-
-
-function rightDown(e) {
-
-    e.preventDefault();
-
-    if (
-        riders[0]
-    ) {
-
-        riders[0].turnRight =
-            true;
-
-    }
-
-}
-
-
-function rightUp(e) {
-
-    e.preventDefault();
-
-    if (
-        riders[0]
-    ) {
-
-        riders[0].turnRight =
-            false;
-
-    }
-
-}
-
-
-leftButton.addEventListener(
-    "pointerdown",
-    leftDown
-);
-
-leftButton.addEventListener(
-    "pointerup",
-    leftUp
-);
-
-leftButton.addEventListener(
-    "pointercancel",
-    leftUp
-);
-
-leftButton.addEventListener(
-    "pointerleave",
-    leftUp
-);
-
-
-rightButton.addEventListener(
-    "pointerdown",
-    rightDown
-);
-
-rightButton.addEventListener(
-    "pointerup",
-    rightUp
-);
-
-rightButton.addEventListener(
-    "pointercancel",
-    rightUp
-);
-
-rightButton.addEventListener(
-    "pointerleave",
-    rightUp
-);
-
-
-/* keyboard */
-
-document.addEventListener(
-    "keydown",
-    e => {
-
-        if (
-            !riders[0]
-        ) return;
-
-
-        if (
-            e.code ===
-            "ArrowLeft"
-        ) {
-
-            riders[0].turnLeft =
-                true;
-
-        }
-
-
-        if (
-            e.code ===
-            "ArrowRight"
-        ) {
-
-            riders[0].turnRight =
-                true;
-
-        }
-
-
-        if (
-            e.code ===
-            "KeyA"
-        ) {
-
-            riders[0].turnLeft =
-                true;
-
-        }
-
-
-        if (
-            e.code ===
-            "KeyD"
-        ) {
-
-            riders[0].turnRight =
-                true;
-
-        }
-
-
-        if (
-            e.code ===
-            "KeyP" ||
-            e.code ===
-            "Escape"
-        ) {
-
-            togglePause();
-
-        }
-
-    }
-);
-
-
-document.addEventListener(
-    "keyup",
-    e => {
-
-        if (
-            !riders[0]
-        ) return;
-
-
-        if (
-            e.code ===
-            "ArrowLeft" ||
-            e.code ===
-            "KeyA"
-        ) {
-
-            riders[0].turnLeft =
-                false;
-
-        }
-
-
-        if (
-            e.code ===
-            "ArrowRight" ||
-            e.code ===
-            "KeyD"
-        ) {
-
-            riders[0].turnRight =
-                false;
-
-        }
-
-    }
-);
-
-
-/* =========================================================
-   PLAYER TURNING
-========================================================= */
-
-function updatePlayer(
-    rider,
-    dt
-) {
-
-    if (
-        rider.turnLeft
-    ) {
-
-        rider.angle -=
-            TURN_SPEED * dt;
-
-    }
-
-
-    if (
-        rider.turnRight
-    ) {
-
-        rider.angle +=
-            TURN_SPEED * dt;
-
-    }
-
-}
-
-
-/* =========================================================
-   AI
-========================================================= */
-
-function updateAI(
-    rider,
-    dt
-) {
-
-    rider.aiTimer -= dt;
-
-
-    if (
-        rider.aiTimer <= 0
-    ) {
-
-        rider.aiTimer =
-            20 + Math.random() * 80;
-
-
-        const danger =
-            checkDangerAhead(
-                rider,
-                90
-            );
-
-
-        if (danger) {
-
-            if (
-                Math.random() < .5
-            ) {
-
-                rider.targetTurn =
-                    -1;
-
-            }
-
-            else {
-
-                rider.targetTurn =
-                    1;
-
-            }
-
-        }
-
-        else {
-
-            if (
-                Math.random() < .35
-            ) {
-
-                rider.targetTurn =
-                    Math.random() <
-                    .5
-                        ? -1
-                        : 1;
-
-            }
-
-            else {
-
-                rider.targetTurn =
-                    0;
-
-            }
-
-        }
-
-    }
-
-
-    if (
-        rider.targetTurn < 0
-    ) {
-
-        rider.angle -=
-            TURN_SPEED * dt;
-
-    }
-
-    if (
-        rider.targetTurn > 0
-    ) {
-
-        rider.angle +=
-            TURN_SPEED * dt;
-
-    }
-
-}
-
-
-/* =========================================================
-   DANGER CHECK
-========================================================= */
-
-function checkDangerAhead(
-    rider,
-    distance
-) {
-
-    const testX =
-        rider.x +
-        Math.cos(
-            rider.angle
-        ) * distance;
-
-    const testY =
-        rider.y +
-        Math.sin(
-            rider.angle
-        ) * distance;
-
-
-    if (
-        testX <
-        ARENA_MARGIN + 15
-    ) return true;
-
-
-    if (
-        testX >
-        W -
-        ARENA_MARGIN -
-        15
-    ) return true;
-
-
-    if (
-        testY <
-        ARENA_MARGIN + 15
-    ) return true;
-
-
-    if (
-        testY >
-        H -
-        ARENA_MARGIN -
-        15
-    ) return true;
-
-
-    for (
-        const other of riders
-    ) {
-
-        for (
-            let i =
-                Math.max(
-                    0,
-                    other.trail.length -
-                    80
-                );
-
-            i <
-                other.trail.length;
-
-            i++
-        ) {
-
-            const point =
-                other.trail[i];
-
-            const dx =
-                point.x -
-                testX;
-
-            const dy =
-                point.y -
-                testY;
-
-            if (
-                Math.sqrt(
-                    dx * dx +
-                    dy * dy
-                ) < 18
-            ) {
-
-                return true;
-
-            }
-
-        }
-
-    }
-
-
-    return false;
-
-}
-
-
-/* =========================================================
-   MOVE RIDER
-========================================================= */
-
-function moveRider(
-    rider,
-    dt
-) {
-
-    rider.x +=
-        Math.cos(
-            rider.angle
-        ) *
-        rider.speed *
-        dt;
-
-    rider.y +=
-        Math.sin(
-            rider.angle
-        ) *
-        rider.speed *
-        dt;
-
-
-    /* trail */
-
-    const dx =
-        rider.x -
-        rider.lastTrailX;
-
-    const dy =
-        rider.y -
-        rider.lastTrailY;
-
-    const distance =
-        Math.sqrt(
-            dx * dx +
-            dy * dy
+        gameOver = true;
+
+        showMessage(
+            "CRASHED",
+            "You hit the arena wall"
         );
 
+        return;
+    }
 
     if (
-        distance >=
-        TRAIL_SPACING
+        trail.length === 0 ||
+        distanceBetween(
+            cycle.x,
+            cycle.y,
+            trail[trail.length - 1].x,
+            trail[trail.length - 1].y
+        ) > 0.08
     ) {
 
-        rider.trail.push({
-
-            x: rider.x,
-
-            y: rider.y
-
+        trail.push({
+            x: cycle.x,
+            y: cycle.y
         });
-
-        rider.lastTrailX =
-            rider.x;
-
-        rider.lastTrailY =
-            rider.y;
-
     }
 
-
-    /* speed slowly increases */
-
-    rider.speed =
-        Math.min(
-            8,
-            BASE_SPEED +
-            elapsed * .002
-        );
-
+    if (trail.length > 2500) {
+        trail.shift();
+    }
 }
 
 
 /* =========================================================
-   COLLISION
-========================================================= */
+   DISTANCE
+   ========================================================= */
 
-function checkCollision(
-    rider
-) {
+function distanceBetween(x1, y1, x2, y2) {
 
-    /* arena walls */
+    const dx = x1 - x2;
+    const dy = y1 - y2;
 
-    if (
-        rider.x <
-        ARENA_MARGIN
-    ) {
-
-        return true;
-
-    }
+    return Math.sqrt(dx * dx + dy * dy);
+}
 
 
-    if (
-        rider.x >
-        W -
-        ARENA_MARGIN
-    ) {
+/* =========================================================
+   TRAIL COLLISION
+   ========================================================= */
 
-        return true;
+function checkTrailCollision(cycle, trail) {
 
-    }
+    const checkDistance = 0.35;
 
+    for (let i = 0; i < trail.length - 5; i++) {
 
-    if (
-        rider.y <
-        ARENA_MARGIN
-    ) {
+        const point = trail[i];
 
-        return true;
-
-    }
-
-
-    if (
-        rider.y >
-        H -
-        ARENA_MARGIN
-    ) {
-
-        return true;
-
-    }
-
-
-    /* trails */
-
-    for (
-        const other of riders
-    ) {
-
-        for (
-            let i = 0;
-            i <
-            other.trail.length;
-            i++
+        if (
+            Math.abs(cycle.x - point.x) < checkDistance &&
+            Math.abs(cycle.y - point.y) < checkDistance
         ) {
-
-            const point =
-                other.trail[i];
-
-
-            /* ignore extremely recent
-               trail points of yourself */
-
-            if (
-                other === rider &&
-                i >
-                other.trail.length -
-                12
-            ) {
-
-                continue;
-
-            }
-
-
-            const dx =
-                point.x -
-                rider.x;
-
-            const dy =
-                point.y -
-                rider.y;
-
-
-            if (
-                dx * dx +
-                dy * dy <
-                12 * 12
-            ) {
-
-                return true;
-
-            }
-
+            return true;
         }
-
     }
-
 
     return false;
-
 }
 
 
 /* =========================================================
-   CRASH
-========================================================= */
+   CYCLE COLLISION
+   ========================================================= */
 
-function crash(
-    rider
-) {
+function checkCycleCollision() {
 
     if (
-        !rider.alive
-    ) return;
-
-
-    rider.alive =
-        false;
-
-
-    createExplosion(
-        rider.x,
-        rider.y,
-        rider.color
-    );
-
-
-    shake = 12;
-
-
-    if (
-        rider === riders[0]
+        distanceBetween(
+            player.x,
+            player.y,
+            enemy.x,
+            enemy.y
+        ) < 0.75
     ) {
-
-        gameState =
-            "dead";
-
-
-        document.getElementById(
-            "deathMessage"
-        ).textContent =
-            "Your cycle crashed. Score: " +
-            score;
-
-
-        setTimeout(
-            () => {
-
-                if (
-                    gameState ===
-                    "dead"
-                ) {
-
-                    deathMenu.style.display =
-                        "flex";
-
-                }
-
-            },
-            650
-        );
-
+        return true;
     }
 
+    return false;
 }
 
 
 /* =========================================================
-   SCORE
-========================================================= */
+   ENEMY AI
+   ========================================================= */
 
-function updateScore() {
+function updateEnemyAI() {
 
-    const player =
-        riders[0];
+    const possibleDirections = [
+        "UP",
+        "DOWN",
+        "LEFT",
+        "RIGHT"
+    ];
 
-    if (
-        !player
-    ) return;
+    const safeDirections = possibleDirections.filter(dir => {
 
+        if (isOpposite(enemy.dir, dir)) {
+            return false;
+        }
 
-    score =
-        Math.floor(
-            elapsed * 10
-        );
+        const direction = DIRECTIONS[dir];
 
-}
+        const testX = enemy.x + direction.x * 1.5;
+        const testY = enemy.y + direction.y * 1.5;
 
+        if (
+            testX < 0.5 ||
+            testX > GRID_SIZE - 0.5 ||
+            testY < 0.5 ||
+            testY > GRID_SIZE - 0.5
+        ) {
+            return false;
+        }
 
-/* =========================================================
-   PARTICLES
-========================================================= */
+        if (
+            checkPointAgainstTrail(
+                testX,
+                testY,
+                enemyTrail
+            )
+        ) {
+            return false;
+        }
 
-function createParticle(
-    x,
-    y,
-    vx,
-    vy,
-    life,
-    size,
-    color
-) {
+        if (
+            checkPointAgainstTrail(
+                testX,
+                testY,
+                playerTrail
+            )
+        ) {
+            return false;
+        }
 
-    particles.push({
-
-        x,
-        y,
-
-        vx,
-        vy,
-
-        life,
-
-        maxLife:
-            life,
-
-        size,
-
-        color
-
+        return true;
     });
 
-}
-
-
-function createExplosion(
-    x,
-    y,
-    color
-) {
-
-    for (
-        let i = 0;
-        i < 50;
-        i++
-    ) {
-
-        const angle =
-            Math.random() *
-            Math.PI *
-            2;
-
-        const speed =
-            Math.random() *
-            7 +
-            2;
-
-        createParticle(
-
-            x,
-            y,
-
-            Math.cos(angle) *
-            speed,
-
-            Math.sin(angle) *
-            speed,
-
-            30 +
-            Math.random() *
-            35,
-
-            Math.random() <
-                .7
-                ? color
-                : "#ffffff",
-
-            Math.random() *
-                6 +
-                2
-
-        );
-
+    if (safeDirections.length === 0) {
+        return;
     }
 
-}
+    const currentDirection = enemy.dir;
 
+    if (safeDirections.includes(currentDirection)) {
 
-function updateParticles(
-    dt
-) {
+        if (Math.random() < 0.025) {
 
-    for (
-        let i =
-            particles.length -
-            1;
-
-        i >= 0;
-
-        i--
-    ) {
-
-        const p =
-            particles[i];
-
-
-        p.x +=
-            p.vx * dt;
-
-        p.y +=
-            p.vy * dt;
-
-
-        p.vx *=
-            .97;
-
-        p.vy *=
-            .97;
-
-
-        p.life -= dt;
-
-
-        if (
-            p.life <= 0
-        ) {
-
-            particles.splice(
-                i,
-                1
+            const turns = safeDirections.filter(
+                d => d !== currentDirection
             );
 
+            if (turns.length > 0) {
+                enemy.nextDir =
+                    turns[Math.floor(Math.random() * turns.length)];
+            }
         }
 
+    } else {
+
+        enemy.nextDir =
+            safeDirections[
+                Math.floor(Math.random() * safeDirections.length)
+            ];
+    }
+}
+
+
+/* =========================================================
+   TRAIL POINT CHECK
+   ========================================================= */
+
+function checkPointAgainstTrail(x, y, trail) {
+
+    const checkDistance = 0.42;
+
+    for (let i = 0; i < trail.length; i++) {
+
+        const point = trail[i];
+
+        if (
+            Math.abs(x - point.x) < checkDistance &&
+            Math.abs(y - point.y) < checkDistance
+        ) {
+            return true;
+        }
     }
 
+    return false;
 }
 
 
 /* =========================================================
    UPDATE
-========================================================= */
+   ========================================================= */
 
 function update(dt) {
 
-    updateParticles(dt);
+    if (paused || gameOver) return;
 
+    updateEnemyAI();
+
+    moveCycle(player, playerTrail, dt);
+    moveCycle(enemy, enemyTrail, dt);
+
+    if (gameOver) return;
 
     if (
-        gameState !==
-        "playing"
+        player.trailEnabled &&
+        checkTrailCollision(player, enemyTrail)
     ) {
+        gameOver = true;
+
+        showMessage(
+            "CRASHED",
+            "You hit the red light trail"
+        );
 
         return;
-
     }
-
-
-    elapsed += dt;
-
-
-    const player =
-        riders[0];
-
-
-    /* player */
 
     if (
-        player.alive
+        checkTrailCollision(enemy, playerTrail)
     ) {
+        gameOver = true;
 
-        updatePlayer(
-            player,
-            dt
+        showMessage(
+            "VICTORY",
+            "The red cycle crashed"
         );
 
-        moveRider(
-            player,
-            dt
-        );
-
+        return;
     }
 
+    if (checkCycleCollision()) {
 
-    /* AI */
+        gameOver = true;
 
-    for (
-        let i = 1;
-        i < riders.length;
-        i++
-    ) {
-
-        const rider =
-            riders[i];
-
-
-        if (
-            !rider.alive
-        ) continue;
-
-
-        updateAI(
-            rider,
-            dt
+        showMessage(
+            "CRASH",
+            "The cycles collided"
         );
-
-        moveRider(
-            rider,
-            dt
-        );
-
     }
-
-
-    /* collisions */
-
-    for (
-        const rider of riders
-    ) {
-
-        if (
-            rider.alive &&
-            checkCollision(rider)
-        ) {
-
-            crash(rider);
-
-        }
-
-    }
-
-
-    /* score */
-
-    updateScore();
-
-
-    /* victory */
-
-    const aliveRiders =
-        riders.filter(
-            r => r.alive
-        );
-
-
-    if (
-        player.alive &&
-        aliveRiders.length === 1
-    ) {
-
-        gameState =
-            "won";
-
-
-        createExplosion(
-            player.x,
-            player.y,
-            player.color
-        );
-
-
-        setTimeout(
-            () => {
-
-                winMenu.style.display =
-                    "flex";
-
-            },
-            500
-        );
-
-    }
-
-
-    if (
-        shake > 0
-    ) {
-
-        shake *= .9;
-
-        if (
-            shake < .1
-        ) {
-
-            shake = 0;
-
-        }
-
-    }
-
-
-    updateHUD();
-
 }
 
 
 /* =========================================================
-   BACKGROUND
-========================================================= */
+   DRAW BACKGROUND
+   ========================================================= */
 
 function drawBackground() {
 
-    const gradient =
-        ctx.createRadialGradient(
-            W / 2,
-            H / 2,
-            50,
-            W / 2,
-            H / 2,
-            Math.max(W, H)
-        );
-
-
-    gradient.addColorStop(
-        0,
-        "#091a3d"
+    const gradient = ctx.createRadialGradient(
+        width / 2,
+        height / 2,
+        20,
+        width / 2,
+        height / 2,
+        Math.max(width, height) * 0.7
     );
 
-    gradient.addColorStop(
-        1,
-        "#01030a"
-    );
+    gradient.addColorStop(0, "#041d3a");
+    gradient.addColorStop(0.5, "#020d24");
+    gradient.addColorStop(1, "#01030b");
+
+    ctx.fillStyle = gradient;
+    ctx.fillRect(0, 0, width, height);
 
 
-    ctx.fillStyle =
-        gradient;
-
-    ctx.fillRect(
-        0,
-        0,
-        W,
-        H
-    );
-
-
-    /* grid */
+    /* blue neon atmosphere */
 
     ctx.save();
 
+    ctx.globalAlpha = 0.18;
 
-    ctx.strokeStyle =
-        "rgba(0,234,255,.09)";
+    for (let i = 0; i < 12; i++) {
 
-    ctx.lineWidth = 1;
+        const x =
+            (i * 173 + performance.now() * 0.012) % width;
 
+        const y =
+            (i * 97) % height;
 
-    const grid = 50;
+        const radius = 80 + (i % 4) * 35;
 
-
-    for (
-        let x =
-            -(
-                elapsed *
-                .5
-            ) %
-            grid;
-
-        x < W;
-
-        x += grid
-    ) {
-
-        ctx.beginPath();
-
-        ctx.moveTo(
+        const glow = ctx.createRadialGradient(
             x,
-            0
-        );
-
-        ctx.lineTo(
-            x,
-            H
-        );
-
-        ctx.stroke();
-
-    }
-
-
-    for (
-        let y = 0;
-
-        y < H;
-
-        y += grid
-    ) {
-
-        ctx.beginPath();
-
-        ctx.moveTo(
+            y,
             0,
-            y
+            x,
+            y,
+            radius
         );
 
-        ctx.lineTo(
-            W,
-            y
+        glow.addColorStop(
+            0,
+            "rgba(0,150,255,0.5)"
         );
 
-        ctx.stroke();
+        glow.addColorStop(
+            1,
+            "rgba(0,50,255,0)"
+        );
 
+        ctx.fillStyle = glow;
+
+        ctx.beginPath();
+        ctx.arc(x, y, radius, 0, Math.PI * 2);
+        ctx.fill();
     }
-
 
     ctx.restore();
-
 }
 
 
 /* =========================================================
-   ARENA BORDER
-========================================================= */
+   DRAW ARENA
+   ========================================================= */
 
 function drawArena() {
 
     ctx.save();
 
+    /* outer glow */
 
-    ctx.shadowBlur =
-        25;
+    ctx.shadowBlur = 25;
+    ctx.shadowColor = "rgba(0, 130, 255, 0.8)";
 
-    ctx.shadowColor =
-        "#00eaff";
-
-
-    ctx.strokeStyle =
-        "#00eaff";
-
-    ctx.lineWidth =
-        5;
-
+    ctx.strokeStyle = "#087cff";
+    ctx.lineWidth = 3;
 
     ctx.strokeRect(
+        arenaLeft,
+        arenaTop,
+        arenaSize,
+        arenaSize
+    );
 
-        ARENA_MARGIN,
+    ctx.shadowBlur = 0;
 
-        ARENA_MARGIN,
 
-        W -
-            ARENA_MARGIN *
-            2,
+    /* black arena surface */
 
-        H -
-            ARENA_MARGIN *
-            2
+    ctx.fillStyle = "rgba(0, 3, 10, 0.78)";
 
+    ctx.fillRect(
+        arenaLeft,
+        arenaTop,
+        arenaSize,
+        arenaSize
     );
 
 
-    ctx.shadowBlur =
-        0;
+    /* 25 × 25 grid */
+
+    for (let i = 0; i <= GRID_SIZE; i++) {
+
+        const position =
+            arenaLeft + i * cellSize;
+
+        ctx.beginPath();
+        ctx.moveTo(position, arenaTop);
+        ctx.lineTo(position, arenaTop + arenaSize);
+
+        ctx.strokeStyle =
+            i === 0 || i === GRID_SIZE
+                ? "rgba(0,170,255,0.7)"
+                : "rgba(0,100,190,0.25)";
+
+        ctx.lineWidth =
+            i === 0 || i === GRID_SIZE
+                ? 2
+                : 1;
+
+        ctx.stroke();
+    }
 
 
-    ctx.strokeStyle =
-        "rgba(0,234,255,.2)";
+    for (let i = 0; i <= GRID_SIZE; i++) {
 
-    ctx.lineWidth =
-        15;
+        const position =
+            arenaTop + i * cellSize;
+
+        ctx.beginPath();
+        ctx.moveTo(arenaLeft, position);
+        ctx.lineTo(arenaLeft + arenaSize, position);
+
+        ctx.strokeStyle =
+            i === 0 || i === GRID_SIZE
+                ? "rgba(0,170,255,0.7)"
+                : "rgba(0,100,190,0.25)";
+
+        ctx.lineWidth =
+            i === 0 || i === GRID_SIZE
+                ? 2
+                : 1;
+
+        ctx.stroke();
+    }
+
+    ctx.restore();
+}
 
 
-    ctx.strokeRect(
+/* =========================================================
+   DRAW TRAIL
+   ========================================================= */
 
-        ARENA_MARGIN,
+function drawTrail(trail, color) {
 
-        ARENA_MARGIN,
+    if (trail.length < 2) return;
 
-        W -
-            ARENA_MARGIN *
-            2,
+    ctx.save();
 
-        H -
-            ARENA_MARGIN *
-            2
+    ctx.lineJoin = "round";
+    ctx.lineCap = "round";
 
+    /* outer glow */
+
+    ctx.beginPath();
+
+    for (let i = 0; i < trail.length; i++) {
+
+        const point = gridToPixel(
+            trail[i].x,
+            trail[i].y
+        );
+
+        if (i === 0) {
+            ctx.moveTo(point.x, point.y);
+        } else {
+            ctx.lineTo(point.x, point.y);
+        }
+    }
+
+    ctx.strokeStyle = color;
+    ctx.lineWidth = TRAIL_WIDTH + 10;
+
+    ctx.globalAlpha = 0.22;
+    ctx.shadowBlur = 25;
+    ctx.shadowColor = color;
+
+    ctx.stroke();
+
+
+    /* main trail */
+
+    ctx.beginPath();
+
+    for (let i = 0; i < trail.length; i++) {
+
+        const point = gridToPixel(
+            trail[i].x,
+            trail[i].y
+        );
+
+        if (i === 0) {
+            ctx.moveTo(point.x, point.y);
+        } else {
+            ctx.lineTo(point.x, point.y);
+        }
+    }
+
+    ctx.globalAlpha = 0.9;
+    ctx.shadowBlur = 12;
+    ctx.shadowColor = color;
+
+    ctx.strokeStyle = color;
+    ctx.lineWidth = TRAIL_WIDTH;
+
+    ctx.stroke();
+
+
+    /* white center */
+
+    ctx.globalAlpha = 0.9;
+    ctx.shadowBlur = 5;
+    ctx.shadowColor = "#ffffff";
+
+    ctx.strokeStyle = "#dff8ff";
+    ctx.lineWidth = 1.5;
+
+    ctx.stroke();
+
+    ctx.restore();
+}
+
+
+/* =========================================================
+   DRAW CYCLE
+   ========================================================= */
+
+function drawCycle(cycle) {
+
+    const center = gridToPixel(
+        cycle.x,
+        cycle.y
     );
+
+    const length = cellSize * 0.92;
+    const thickness = Math.max(7, cellSize * 0.25);
+
+    let angle = 0;
+
+    if (cycle.dir === "UP") {
+        angle = -Math.PI / 2;
+    }
+
+    if (cycle.dir === "DOWN") {
+        angle = Math.PI / 2;
+    }
+
+    if (cycle.dir === "LEFT") {
+        angle = Math.PI;
+    }
+
+    if (cycle.dir === "RIGHT") {
+        angle = 0;
+    }
+
+
+    ctx.save();
+
+    ctx.translate(center.x, center.y);
+    ctx.rotate(angle);
+
+
+    /* long outer body */
+
+    ctx.shadowBlur = 24;
+    ctx.shadowColor = cycle.color;
+
+    ctx.fillStyle = cycle.color;
+
+    ctx.beginPath();
+
+    ctx.roundRect(
+        -length / 2,
+        -thickness / 2,
+        length,
+        thickness,
+        thickness / 2
+    );
+
+    ctx.fill();
+
+
+    /* black center */
+
+    ctx.shadowBlur = 0;
+
+    ctx.fillStyle = "#02040a";
+
+    ctx.beginPath();
+
+    ctx.roundRect(
+        -length / 2 + 3,
+        -thickness / 2 + 2,
+        length - 6,
+        thickness - 4,
+        thickness / 2
+    );
+
+    ctx.fill();
+
+
+    /* bright neon core */
+
+    ctx.fillStyle = cycle.core;
+
+    ctx.shadowBlur = 10;
+    ctx.shadowColor = cycle.color;
+
+    ctx.beginPath();
+
+    ctx.roundRect(
+        -length / 2 + 4,
+        -1,
+        length - 8,
+        2,
+        1
+    );
+
+    ctx.fill();
+
+
+    /* front light */
+
+    ctx.fillStyle = cycle.color;
+
+    ctx.shadowBlur = 18;
+
+    ctx.beginPath();
+
+    ctx.arc(
+        length / 2 - 2,
+        0,
+        thickness * 0.28,
+        0,
+        Math.PI * 2
+    );
+
+    ctx.fill();
 
 
     ctx.restore();
-
 }
 
 
 /* =========================================================
-   DRAW TRAILS
-========================================================= */
+   DRAW HUD
+   ========================================================= */
 
-function drawTrails() {
+function drawHUD() {
 
-    for (
-        const rider of riders
-    ) {
+    ctx.save();
 
-        if (
-            rider.trail.length <
-            2
-        ) continue;
+    ctx.font = "bold 12px Arial";
+    ctx.textBaseline = "middle";
 
+    ctx.fillStyle = "rgba(150,220,255,0.8)";
+    ctx.fillText(
+        "25 × 25",
+        arenaLeft,
+        arenaTop - 12
+    );
 
-        ctx.save();
+    if (laserActive) {
 
+        ctx.fillStyle = "#67dfff";
+        ctx.shadowBlur = 10;
+        ctx.shadowColor = "#39caff";
 
-        ctx.lineCap =
-            "round";
-
-        ctx.lineJoin =
-            "round";
-
-
-        /* glow */
-
-        ctx.shadowBlur =
-            20;
-
-        ctx.shadowColor =
-            rider.color;
-
-        ctx.strokeStyle =
-            rider.color;
-
-        ctx.lineWidth =
-            7;
-
-
-        ctx.beginPath();
-
-
-        ctx.moveTo(
-
-            rider.trail[0].x,
-
-            rider.trail[0].y
-
+        ctx.fillText(
+            "LASER ACTIVE",
+            arenaLeft + arenaSize - 90,
+            arenaTop - 12
         );
-
-
-        for (
-            let i = 1;
-            i <
-            rider.trail.length;
-            i++
-        ) {
-
-            ctx.lineTo(
-
-                rider.trail[i].x,
-
-                rider.trail[i].y
-
-            );
-
-        }
-
-
-        ctx.stroke();
-
-
-        /* bright core */
-
-        ctx.shadowBlur =
-            0;
-
-        ctx.strokeStyle =
-            "#ffffff";
-
-        ctx.globalAlpha =
-            .8;
-
-        ctx.lineWidth =
-            2;
-
-
-        ctx.beginPath();
-
-
-        ctx.moveTo(
-
-            rider.trail[0].x,
-
-            rider.trail[0].y
-
-        );
-
-
-        for (
-            let i = 1;
-            i <
-            rider.trail.length;
-            i++
-        ) {
-
-            ctx.lineTo(
-
-                rider.trail[i].x,
-
-                rider.trail[i].y
-
-            );
-
-        }
-
-
-        ctx.stroke();
-
-
-        ctx.restore();
-
     }
 
-}
-
-
-/* =========================================================
-   DRAW RIDERS
-========================================================= */
-
-function drawRiders() {
-
-    for (
-        const rider of riders
-    ) {
-
-        if (
-            !rider.alive
-        ) continue;
-
-
-        ctx.save();
-
-
-        ctx.translate(
-            rider.x,
-            rider.y
-        );
-
-
-        ctx.rotate(
-            rider.angle
-        );
-
-
-        /* glow */
-
-        ctx.shadowBlur =
-            25;
-
-        ctx.shadowColor =
-            rider.color;
-
-
-        /* main bike */
-
-        ctx.fillStyle =
-            rider.color;
-
-
-        ctx.fillRect(
-            -25,
-            -11,
-            50,
-            22
-        );
-
-
-        /* body */
-
-        ctx.fillStyle =
-            "#07101e";
-
-
-        ctx.fillRect(
-            -12,
-            -8,
-            25,
-            16
-        );
-
-
-        /* front */
-
-        ctx.fillStyle =
-            "#ffffff";
-
-
-        ctx.fillRect(
-            14,
-            -5,
-            8,
-            10
-        );
-
-
-        /* wheels */
-
-        ctx.fillStyle =
-            rider.color;
-
-
-        ctx.fillRect(
-            -18,
-            -15,
-            9,
-            5
-        );
-
-
-        ctx.fillRect(
-            -18,
-            10,
-            9,
-            5
-        );
-
-
-        ctx.restore();
-
-    }
-
-}
-
-
-/* =========================================================
-   PARTICLES
-========================================================= */
-
-function drawParticles() {
-
-    for (
-        const p of particles
-    ) {
-
-        const alpha =
-            Math.max(
-                0,
-                p.life /
-                p.maxLife
-            );
-
-
-        ctx.globalAlpha =
-            alpha;
-
-
-        ctx.shadowBlur =
-            12;
-
-        ctx.shadowColor =
-            p.color;
-
-
-        ctx.fillStyle =
-            p.color;
-
-
-        ctx.fillRect(
-
-            p.x - p.size / 2,
-
-            p.y - p.size / 2,
-
-            p.size,
-
-            p.size
-
-        );
-
-    }
-
-
-    ctx.globalAlpha =
-        1;
-
-    ctx.shadowBlur =
-        0;
-
-}
-
-
-/* =========================================================
-   HUD
-========================================================= */
-
-function updateHUD() {
-
-    document.getElementById(
-        "scoreText"
-    ).textContent =
-        "SCORE: " +
-        score;
-
-
-    const alive =
-        riders.filter(
-            r => r.alive
-        ).length;
-
-
-    document.getElementById(
-        "aliveText"
-    ).textContent =
-        "RIDERS: " +
-        alive;
-
+    ctx.restore();
 }
 
 
 /* =========================================================
    DRAW
-========================================================= */
+   ========================================================= */
 
 function draw() {
 
-    ctx.save();
-
-
-    if (
-        shake > 0
-    ) {
-
-        ctx.translate(
-
-            (Math.random() -
-                .5) *
-                shake,
-
-            (Math.random() -
-                .5) *
-                shake
-
-        );
-
-    }
-
+    ctx.clearRect(0, 0, width, height);
 
     drawBackground();
 
     drawArena();
 
-    drawTrails();
+    /*
+       The red cycle always leaves its red light trail.
+    */
 
-    drawRiders();
+    drawTrail(
+        enemyTrail,
+        ENEMY_COLOR
+    );
 
-    drawParticles();
+    /*
+       The player's blue trail only appears
+       after a double tap activates the laser.
+    */
 
+    if (player.trailEnabled) {
 
-    ctx.restore();
+        drawTrail(
+            playerTrail,
+            PLAYER_COLOR
+        );
+    }
 
+    drawCycle(enemy);
+    drawCycle(player);
+
+    drawHUD();
 }
 
 
 /* =========================================================
-   MAIN LOOP
-========================================================= */
+   MESSAGE
+   ========================================================= */
 
-let lastTime =
-    performance.now();
+function showMessage(title, text) {
 
+    messageTitle.textContent = title;
+    messageText.textContent = text;
 
-function gameLoop(now) {
-
-    let dt =
-        (now -
-            lastTime) /
-        16.6667;
+    message.style.opacity = "1";
+}
 
 
-    lastTime =
-        now;
+function hideMessage() {
+
+    message.style.opacity = "0";
+}
 
 
-    if (
-        dt > 2
-    ) {
+/* =========================================================
+   GAME LOOP
+   ========================================================= */
 
-        dt = 2;
+function loop(time) {
 
-    }
-
-
-    update(dt);
-
-    draw();
-
-
-    requestAnimationFrame(
-        gameLoop
+    const dt = Math.min(
+        (time - lastTime) / 1000,
+        0.04
     );
 
+    lastTime = time;
+
+    update(dt);
+    draw();
+
+    requestAnimationFrame(loop);
 }
 
 
 /* =========================================================
    START
-========================================================= */
+   ========================================================= */
 
 resize();
-
 resetGame();
 
-requestAnimationFrame(
-    gameLoop
-);
+requestAnimationFrame(loop);
 
 </script>
 
