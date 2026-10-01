@@ -2,10 +2,8 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport"
-      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-
-<title>Neon Light Cycle</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Neon Cycles</title>
 
 <style>
     * {
@@ -15,481 +13,314 @@
 
     html, body {
         margin: 0;
+        padding: 0;
         width: 100%;
         height: 100%;
         overflow: hidden;
-        background: #020611;
+        background:
+            radial-gradient(circle at center, #001b35 0%, #000814 55%, #000000 100%);
         font-family: Arial, Helvetica, sans-serif;
+        color: white;
         touch-action: none;
         user-select: none;
     }
 
     body {
         display: flex;
-        align-items: center;
         justify-content: center;
+        align-items: center;
     }
 
-    #game {
+    #gameWrapper {
         position: relative;
-        width: 100vw;
-        height: 100vh;
-        overflow: hidden;
-
-        background:
-            radial-gradient(
-                circle at 50% 45%,
-                rgba(0, 120, 255, 0.16),
-                transparent 48%
-            ),
-            radial-gradient(
-                circle at 20% 80%,
-                rgba(0, 80, 255, 0.12),
-                transparent 40%
-            ),
-            #020611;
+        width: min(94vw, 700px);
+        aspect-ratio: 1 / 1;
+        display: flex;
+        justify-content: center;
+        align-items: center;
     }
 
     canvas {
-        position: absolute;
-        inset: 0;
         width: 100%;
         height: 100%;
         display: block;
+        background:
+            linear-gradient(rgba(0, 100, 255, 0.04) 1px, transparent 1px),
+            linear-gradient(90deg, rgba(0, 100, 255, 0.04) 1px, transparent 1px),
+            radial-gradient(circle, #001a30 0%, #000814 70%);
+        border: 2px solid #008cff;
+        box-shadow:
+            0 0 12px #008cff,
+            inset 0 0 30px rgba(0, 110, 255, 0.25);
     }
 
     #pauseButton {
         position: absolute;
-        top: 18px;
-        left: 18px;
-        z-index: 100;
-
-        width: 48px;
-        height: 48px;
-
-        border: 1px solid rgba(80, 190, 255, 0.8);
-        border-radius: 10px;
-
-        background: rgba(0, 10, 25, 0.88);
-        color: #75d9ff;
-
-        font-size: 24px;
+        top: 10px;
+        left: 10px;
+        z-index: 20;
+        width: 42px;
+        height: 42px;
+        border: 2px solid #00aaff;
+        border-radius: 8px;
+        background: rgba(0, 10, 25, 0.85);
+        color: #00c8ff;
+        font-size: 23px;
         font-weight: bold;
-
-        box-shadow:
-            0 0 10px rgba(0, 150, 255, 0.35),
-            inset 0 0 10px rgba(0, 100, 255, 0.12);
-
         display: flex;
         align-items: center;
         justify-content: center;
-
-        touch-action: manipulation;
-
-        cursor: pointer;
-    }
-
-    #pauseButton:active {
-        transform: scale(0.94);
-        background: rgba(0, 35, 65, 0.95);
+        box-shadow:
+            0 0 10px #008cff,
+            inset 0 0 8px rgba(0, 150, 255, 0.3);
     }
 
     #pauseMenu {
         position: absolute;
         inset: 0;
-        z-index: 90;
-
+        z-index: 30;
         display: none;
-        align-items: center;
         justify-content: center;
-
-        background: rgba(0, 3, 12, 0.72);
-        backdrop-filter: blur(5px);
-
-        touch-action: auto;
+        align-items: center;
+        background: rgba(0, 5, 15, 0.72);
+        backdrop-filter: blur(4px);
     }
 
-    #pausePanel {
-        width: min(320px, 82vw);
+    #pauseBox {
+        width: min(75%, 300px);
         padding: 28px;
-
-        border: 1px solid rgba(70, 190, 255, 0.7);
-        border-radius: 16px;
-
-        background:
-            linear-gradient(
-                145deg,
-                rgba(3, 17, 38, 0.96),
-                rgba(0, 7, 18, 0.96)
-            );
-
+        border: 2px solid #00aaff;
+        border-radius: 14px;
+        background: rgba(0, 12, 30, 0.95);
         box-shadow:
-            0 0 25px rgba(0, 130, 255, 0.25),
-            inset 0 0 25px rgba(0, 100, 255, 0.08);
-
+            0 0 25px #008cff,
+            inset 0 0 20px rgba(0, 140, 255, 0.15);
         text-align: center;
-        color: white;
     }
 
-    #pausePanel h1 {
-        margin: 0 0 8px;
-
-        color: #72d8ff;
-
-        font-size: 30px;
-        letter-spacing: 3px;
-
-        text-shadow:
-            0 0 12px rgba(60, 190, 255, 0.8);
-    }
-
-    #pausePanel p {
+    #pauseBox h2 {
         margin: 0 0 22px;
-
-        color: #8da6c2;
-        font-size: 14px;
+        color: #00c8ff;
+        text-shadow: 0 0 10px #008cff;
+        letter-spacing: 3px;
     }
 
     .menuButton {
         width: 100%;
-        min-height: 48px;
-
-        margin-top: 10px;
-
-        border: 1px solid rgba(70, 190, 255, 0.65);
-        border-radius: 10px;
-
-        background: rgba(0, 35, 70, 0.7);
-        color: #9ce5ff;
-
+        margin: 8px 0;
+        padding: 13px;
+        border: 2px solid #008cff;
+        border-radius: 8px;
+        background: #001329;
+        color: #00c8ff;
         font-size: 16px;
         font-weight: bold;
-        letter-spacing: 1px;
-
-        box-shadow:
-            0 0 12px rgba(0, 120, 255, 0.18);
-
-        cursor: pointer;
-
-        touch-action: manipulation;
+        box-shadow: 0 0 8px rgba(0, 140, 255, 0.5);
     }
 
-    .menuButton:active {
-        transform: scale(0.97);
-        background: rgba(0, 65, 115, 0.8);
-    }
-
-    #message {
+    #hud {
         position: absolute;
-
-        left: 50%;
-        top: 50%;
-
-        transform: translate(-50%, -50%);
-
-        z-index: 80;
-
-        color: white;
-        text-align: center;
-
+        top: 8px;
+        left: 0;
+        right: 0;
+        z-index: 10;
         pointer-events: none;
-
-        opacity: 0;
-
-        transition: opacity 0.2s;
+        text-align: center;
     }
 
-    #message h2 {
-        margin: 0;
-
-        font-size: 34px;
-        letter-spacing: 4px;
-
-        text-shadow:
-            0 0 15px #48caff;
+    #stopwatch {
+        display: inline-block;
+        padding: 5px 12px;
+        border-radius: 8px;
+        background: rgba(0, 5, 15, 0.72);
+        color: #ffffff;
+        font-size: 17px;
+        font-weight: bold;
+        letter-spacing: 2px;
+        text-shadow: 0 0 8px #ffffff;
     }
 
-    #message p {
-        margin-top: 8px;
+    #laserStatus {
+        position: absolute;
+        left: 12px;
+        bottom: 10px;
+        color: #00c8ff;
+        font-size: 12px;
+        font-weight: bold;
+        text-shadow: 0 0 8px #00aaff;
+    }
 
-        color: #9db8d0;
-        font-size: 14px;
+    #enemyStatus {
+        position: absolute;
+        right: 12px;
+        bottom: 10px;
+        color: #ff3333;
+        font-size: 12px;
+        font-weight: bold;
+        text-shadow: 0 0 8px #ff0000;
+    }
+
+    #gameMessage {
+        position: absolute;
+        inset: 0;
+        z-index: 15;
+        display: none;
+        justify-content: center;
+        align-items: center;
+        pointer-events: none;
+    }
+
+    #messageText {
+        padding: 18px 25px;
+        border: 2px solid #00c8ff;
+        border-radius: 12px;
+        background: rgba(0, 5, 15, 0.9);
+        color: #ffffff;
+        font-size: 26px;
+        font-weight: bold;
+        text-align: center;
+        text-shadow: 0 0 12px #00aaff;
+        box-shadow: 0 0 20px #008cff;
     }
 </style>
 </head>
 
 <body>
 
-<div id="game">
+<div id="gameWrapper">
 
-    <canvas id="canvas"></canvas>
+    <canvas id="gameCanvas"></canvas>
 
-    <button
-        id="pauseButton"
-        type="button"
-        aria-label="Pause game"
-    >Ⅱ</button>
-
-    <div id="message">
-        <h2 id="messageTitle"></h2>
-        <p id="messageText"></p>
+    <div id="hud">
+        <div id="stopwatch">00:00.00</div>
     </div>
 
+    <div id="pauseButton">Ⅱ</div>
+
+    <div id="laserStatus">LASER OFF</div>
+    <div id="enemyStatus">RED TRAIL ON</div>
+
     <div id="pauseMenu">
-
-        <div id="pausePanel">
-
-            <h1>PAUSED</h1>
-
-            <p>Light Cycle Arena</p>
-
-            <button
-                class="menuButton"
-                id="resumeButton"
-                type="button"
-            >
-                RESUME
-            </button>
-
-            <button
-                class="menuButton"
-                id="restartButton"
-                type="button"
-            >
-                RESTART
-            </button>
-
+        <div id="pauseBox">
+            <h2>PAUSED</h2>
+            <button class="menuButton" id="resumeButton">RESUME</button>
+            <button class="menuButton" id="restartButton">RESTART</button>
         </div>
+    </div>
 
+    <div id="gameMessage">
+        <div id="messageText"></div>
     </div>
 
 </div>
 
-
 <script>
-"use strict";
-
-
-/* =========================================================
-   ELEMENTS
-   ========================================================= */
-
-const canvas = document.getElementById("canvas");
+const canvas = document.getElementById("gameCanvas");
 const ctx = canvas.getContext("2d");
 
-const game = document.getElementById("game");
+const pauseButton = document.getElementById("pauseButton");
+const pauseMenu = document.getElementById("pauseMenu");
+const resumeButton = document.getElementById("resumeButton");
+const restartButton = document.getElementById("restartButton");
 
-const pauseButton =
-    document.getElementById("pauseButton");
+const stopwatch = document.getElementById("stopwatch");
+const laserStatus = document.getElementById("laserStatus");
+const enemyStatus = document.getElementById("enemyStatus");
 
-const pauseMenu =
-    document.getElementById("pauseMenu");
-
-const resumeButton =
-    document.getElementById("resumeButton");
-
-const restartButton =
-    document.getElementById("restartButton");
-
-const message =
-    document.getElementById("message");
-
-const messageTitle =
-    document.getElementById("messageTitle");
-
-const messageText =
-    document.getElementById("messageText");
-
-
-/* =========================================================
-   ARENA
-   ========================================================= */
+const gameMessage = document.getElementById("gameMessage");
+const messageText = document.getElementById("messageText");
 
 const GRID_SIZE = 25;
 
-let width = 0;
-let height = 0;
-
-let arenaSize = 0;
-let arenaLeft = 0;
-let arenaTop = 0;
-
+let canvasSize = 0;
 let cellSize = 0;
 
-
-/* =========================================================
-   GAME SETTINGS
-   ========================================================= */
-
-const PLAYER_SPEED = 7.5;
-const ENEMY_SPEED = 6.5;
-
-const PLAYER_COLOR = "#65d9ff";
-const PLAYER_CORE = "#e7faff";
-
-const ENEMY_COLOR = "#ff304f";
-const ENEMY_CORE = "#fff0f3";
-
-const TRAIL_WIDTH = 5;
-
-const DIRECTIONS = {
-
-    UP: {
-        x: 0,
-        y: -1
-    },
-
-    DOWN: {
-        x: 0,
-        y: 1
-    },
-
-    LEFT: {
-        x: -1,
-        y: 0
-    },
-
-    RIGHT: {
-        x: 1,
-        y: 0
-    }
-
-};
-
-
-/* =========================================================
-   GAME STATE
-   ========================================================= */
-
-let paused = false;
+let gameRunning = true;
 let gameOver = false;
-
-let player;
-let enemy;
-
-let playerTrail = [];
-let enemyTrail = [];
-
-let laserActive = false;
-
-
-/* =========================================================
-   STOPWATCH
-   ========================================================= */
 
 let survivalTime = 0;
 
+let laserActive = false;
+let playerTrail = [];
 
-/* =========================================================
-   RED TRAIL RANDOMIZER
-   ========================================================= */
-
-let enemyTrailActive = false;
-
+let enemyTrailActive = true;
+let enemyTrail = [];
 let enemyTrailTimer = 0;
-
-let enemyTrailNextChange = 0;
 
 const ENEMY_TRAIL_MIN_TIME = 0.7;
 const ENEMY_TRAIL_MAX_TIME = 2.8;
 
+const SWIPE_DISTANCE = 25;
+const TRIPLE_TAP_TIME = 500;
 
-/* =========================================================
-   TIMING
-   ========================================================= */
+let tapCount = 0;
+let tapTimer = null;
 
-let lastTime = 0;
+const player = {
+    x: 3,
+    y: 12,
+    dir: { x: 1, y: 0 },
+    speed: 7.5
+};
 
+const enemy = {
+    x: 21,
+    y: 12,
+    dir: { x: -1, y: 0 },
+    speed: 6.5
+};
 
-/* =========================================================
-   CREATE PLAYER
-   ========================================================= */
+let lastTime = performance.now();
 
-function createPlayer() {
+let pointerStartX = 0;
+let pointerStartY = 0;
 
-    return {
+function resizeCanvas() {
+    const rect = canvas.getBoundingClientRect();
 
-        x: 3,
-        y: 12,
+    canvas.width = rect.width * devicePixelRatio;
+    canvas.height = rect.height * devicePixelRatio;
 
-        dir: "RIGHT",
-        nextDir: "RIGHT",
-
-        color: PLAYER_COLOR,
-        core: PLAYER_CORE,
-
-        speed: PLAYER_SPEED,
-
-        trailEnabled: false
-
-    };
-
-}
-
-
-/* =========================================================
-   CREATE ENEMY
-   ========================================================= */
-
-function createEnemy() {
-
-    return {
-
-        x: 21,
-        y: 12,
-
-        dir: "LEFT",
-        nextDir: "LEFT",
-
-        color: ENEMY_COLOR,
-        core: ENEMY_CORE,
-
-        speed: ENEMY_SPEED
-
-    };
-
-}
-
-
-/* =========================================================
-   RANDOM TRAIL TIMER
-   ========================================================= */
-
-function randomEnemyTrailTime() {
-
-    return (
-        ENEMY_TRAIL_MIN_TIME +
-        Math.random() *
-        (
-            ENEMY_TRAIL_MAX_TIME -
-            ENEMY_TRAIL_MIN_TIME
-        )
+    ctx.setTransform(
+        devicePixelRatio,
+        0,
+        0,
+        devicePixelRatio,
+        0,
+        0
     );
 
+    canvasSize = rect.width;
+    cellSize = canvasSize / GRID_SIZE;
 }
 
+window.addEventListener("resize", resizeCanvas);
+resizeCanvas();
 
-/* =========================================================
-   RESET
-   ========================================================= */
+function randomRange(min, max) {
+    return Math.random() * (max - min) + min;
+}
+
+function setEnemyTrailTimer() {
+    enemyTrailTimer = randomRange(
+        ENEMY_TRAIL_MIN_TIME,
+        ENEMY_TRAIL_MAX_TIME
+    );
+}
 
 function resetGame() {
+    player.x = 3;
+    player.y = 12;
+    player.dir = { x: 1, y: 0 };
 
-    player = createPlayer();
-    enemy = createEnemy();
+    enemy.x = 21;
+    enemy.y = 12;
+    enemy.dir = { x: -1, y: 0 };
 
     playerTrail = [];
-    enemyTrail = [];
-
     laserActive = false;
-    player.trailEnabled = false;
 
     enemyTrailActive = true;
-
-    /*
-       The enemy starts with its trail ON, so its
-       first trail begins exactly where the enemy starts.
-    */
     enemyTrail = [
         {
             x: enemy.x,
@@ -497,2060 +328,727 @@ function resetGame() {
         }
     ];
 
-    enemyTrailTimer = 0;
-
-    enemyTrailNextChange =
-        randomEnemyTrailTime();
+    setEnemyTrailTimer();
 
     survivalTime = 0;
 
-    paused = false;
+    gameRunning = true;
     gameOver = false;
 
+    gameMessage.style.display = "none";
     pauseMenu.style.display = "none";
 
-    hideMessage();
+    tapCount = 0;
+    if (tapTimer) {
+        clearTimeout(tapTimer);
+        tapTimer = null;
+    }
+
+    updateHUD();
 
     lastTime = performance.now();
-
 }
 
+function updateHUD() {
+    const totalHundredths = Math.floor(survivalTime * 100);
+    const minutes = Math.floor(totalHundredths / 6000);
+    const seconds = Math.floor((totalHundredths % 6000) / 100);
+    const hundredths = totalHundredths % 100;
 
-/* =========================================================
-   RESIZE
-   ========================================================= */
+    stopwatch.textContent =
+        String(minutes).padStart(2, "0") +
+        ":" +
+        String(seconds).padStart(2, "0") +
+        "." +
+        String(hundredths).padStart(2, "0");
 
-function resize() {
+    laserStatus.textContent =
+        laserActive ? "LASER ACTIVE" : "LASER OFF";
 
-    const dpr =
-        Math.min(
-            window.devicePixelRatio || 1,
-            2
-        );
-
-    width = window.innerWidth;
-    height = window.innerHeight;
-
-    canvas.width = width * dpr;
-    canvas.height = height * dpr;
-
-    canvas.style.width =
-        width + "px";
-
-    canvas.style.height =
-        height + "px";
-
-    ctx.setTransform(
-        dpr,
-        0,
-        0,
-        dpr,
-        0,
-        0
-    );
-
-    arenaSize =
-        Math.min(width, height) * 0.82;
-
-    arenaSize =
-        Math.max(
-            260,
-            Math.min(
-                arenaSize,
-                Math.min(width, height) - 50
-            )
-        );
-
-    arenaLeft =
-        (width - arenaSize) / 2;
-
-    arenaTop =
-        (height - arenaSize) / 2;
-
-    cellSize =
-        arenaSize / GRID_SIZE;
-
+    enemyStatus.textContent =
+        enemyTrailActive ? "RED TRAIL ON" : "RED TRAIL OFF";
 }
 
+function changeDirection(dx, dy) {
+    if (!gameRunning || gameOver) return;
 
-/* =========================================================
-   GRID TO PIXEL
-   ========================================================= */
-
-function gridToPixel(x, y) {
-
-    return {
-
-        x:
-            arenaLeft +
-            x * cellSize,
-
-        y:
-            arenaTop +
-            y * cellSize
-
-    };
-
-}
-
-
-/* =========================================================
-   OPPOSITE DIRECTION
-   ========================================================= */
-
-function isOpposite(a, b) {
-
-    return (
-
-        (a === "UP" &&
-         b === "DOWN") ||
-
-        (a === "DOWN" &&
-         b === "UP") ||
-
-        (a === "LEFT" &&
-         b === "RIGHT") ||
-
-        (a === "RIGHT" &&
-         b === "LEFT")
-
-    );
-
-}
-
-
-/* =========================================================
-   PLAYER DIRECTION
-   ========================================================= */
-
-function changePlayerDirection(newDirection) {
-
-    if (paused || gameOver) {
-        return;
-    }
-
+    // Prevent reversing directly into yourself.
     if (
-        isOpposite(
-            player.dir,
-            newDirection
-        )
+        dx === -player.dir.x &&
+        dy === -player.dir.y
     ) {
         return;
     }
 
-    player.nextDir = newDirection;
-
+    player.dir = { x: dx, y: dy };
 }
 
-
-/* =========================================================
-   SWIPE CONTROLS
-   ========================================================= */
-
-let touchStartX = 0;
-let touchStartY = 0;
-let touchStartTime = 0;
-
-const SWIPE_DISTANCE = 25;
-const SWIPE_TIME = 700;
-
-
-game.addEventListener(
-    "pointerdown",
-    function(event) {
-
-        if (
-            event.target === pauseButton ||
-            event.target.closest("#pauseMenu")
-        ) {
-            return;
-        }
-
-        touchStartX = event.clientX;
-        touchStartY = event.clientY;
-
-        touchStartTime =
-            performance.now();
-
-    }
-);
-
-
-game.addEventListener(
-    "pointerup",
-    function(event) {
-
-        if (
-            event.target === pauseButton ||
-            event.target.closest("#pauseMenu")
-        ) {
-            return;
-        }
-
-        if (paused || gameOver) {
-            return;
-        }
-
-        const dx =
-            event.clientX -
-            touchStartX;
-
-        const dy =
-            event.clientY -
-            touchStartY;
-
-        const distance =
-            Math.sqrt(
-                dx * dx +
-                dy * dy
-            );
-
-        const elapsed =
-            performance.now() -
-            touchStartTime;
-
-
-        if (
-            distance < SWIPE_DISTANCE
-        ) {
-            return;
-        }
-
-        if (
-            elapsed > SWIPE_TIME
-        ) {
-            return;
-        }
-
-
-        if (
-            Math.abs(dx) >
-            Math.abs(dy)
-        ) {
-
-            if (dx > 0) {
-
-                changePlayerDirection(
-                    "RIGHT"
-                );
-
-            } else {
-
-                changePlayerDirection(
-                    "LEFT"
-                );
-
-            }
-
-        } else {
-
-            if (dy > 0) {
-
-                changePlayerDirection(
-                    "DOWN"
-                );
-
-            } else {
-
-                changePlayerDirection(
-                    "UP"
-                );
-
-            }
-
-        }
-
-    }
-);
-
-
-/* =========================================================
-   TRIPLE TAP = BLUE TRAIL
-   ========================================================= */
-
-let tapCount = 0;
-let tapTimer = null;
-
-const TRIPLE_TAP_TIME = 500;
-
-
-game.addEventListener(
-    "pointerup",
-    function(event) {
-
-        if (
-            event.target === pauseButton ||
-            event.target.closest("#pauseMenu")
-        ) {
-            return;
-        }
-
-        if (paused || gameOver) {
-            return;
-        }
-
-        const dx =
-            event.clientX -
-            touchStartX;
-
-        const dy =
-            event.clientY -
-            touchStartY;
-
-        const distance =
-            Math.sqrt(
-                dx * dx +
-                dy * dy
-            );
-
-
-        /*
-           Only count taps, not swipes.
-        */
-
-        if (
-            distance >= SWIPE_DISTANCE
-        ) {
-            return;
-        }
-
-
-        tapCount++;
-
-        clearTimeout(tapTimer);
-
-        tapTimer = setTimeout(
-            function() {
-
-                tapCount = 0;
-
-            },
-            TRIPLE_TAP_TIME
-        );
-
-
-        if (
-            tapCount === 3
-        ) {
-
-            tapCount = 0;
-
-            clearTimeout(tapTimer);
-
-
-            laserActive =
-                !laserActive;
-
-            player.trailEnabled =
-                laserActive;
-
-
-            /*
-               LASER ON:
-               Completely new trail starting at the
-               player's exact current position.
-            */
-
-            if (
-                laserActive
-            ) {
-
-                playerTrail = [
-
-                    {
-                        x: player.x,
-                        y: player.y
-                    }
-
-                ];
-
-            }
-
-
-            /*
-               LASER OFF:
-               Completely erase the entire blue trail.
-            */
-
-            else {
-
-                playerTrail = [];
-
-            }
-
-        }
-
-    }
-);
-
-
-/* =========================================================
-   PAUSE BUTTON
-   ========================================================= */
-
-pauseButton.addEventListener(
-    "pointerdown",
-    function(event) {
-
-        event.preventDefault();
-        event.stopPropagation();
-
-    }
-);
-
-
-pauseButton.addEventListener(
-    "pointerup",
-    function(event) {
-
-        event.preventDefault();
-        event.stopPropagation();
-
-        togglePause();
-
-    }
-);
-
-
-pauseButton.addEventListener(
-    "click",
-    function(event) {
-
-        event.preventDefault();
-        event.stopPropagation();
-
-    }
-);
-
-
-/* =========================================================
-   PAUSE
-   ========================================================= */
-
-function togglePause() {
-
-    if (gameOver) {
-        return;
-    }
-
-    paused = !paused;
-
-    if (paused) {
-
-        pauseMenu.style.display =
-            "flex";
-
-    } else {
-
-        pauseMenu.style.display =
-            "none";
-
-        lastTime =
-            performance.now();
-
-    }
-
+function moveCycle(cycle, dt) {
+    cycle.x += cycle.dir.x * cycle.speed * dt;
+    cycle.y += cycle.dir.y * cycle.speed * dt;
 }
-
-
-/* =========================================================
-   RESUME
-   ========================================================= */
-
-resumeButton.addEventListener(
-    "click",
-    function(event) {
-
-        event.preventDefault();
-        event.stopPropagation();
-
-        paused = false;
-
-        pauseMenu.style.display =
-            "none";
-
-        lastTime =
-            performance.now();
-
-    }
-);
-
-
-/* =========================================================
-   RESTART
-   ========================================================= */
-
-restartButton.addEventListener(
-    "click",
-    function(event) {
-
-        event.preventDefault();
-        event.stopPropagation();
-
-        resetGame();
-
-    }
-);
-
-
-/* =========================================================
-   KEYBOARD
-   ========================================================= */
-
-window.addEventListener(
-    "keydown",
-    function(event) {
-
-        if (
-            event.key === "ArrowUp" ||
-            event.key.toLowerCase() === "w"
-        ) {
-
-            changePlayerDirection("UP");
-
-        }
-
-        if (
-            event.key === "ArrowDown" ||
-            event.key.toLowerCase() === "s"
-        ) {
-
-            changePlayerDirection("DOWN");
-
-        }
-
-        if (
-            event.key === "ArrowLeft" ||
-            event.key.toLowerCase() === "a"
-        ) {
-
-            changePlayerDirection("LEFT");
-
-        }
-
-        if (
-            event.key === "ArrowRight" ||
-            event.key.toLowerCase() === "d"
-        ) {
-
-            changePlayerDirection("RIGHT");
-
-        }
-
-        if (
-            event.key === " " ||
-            event.key.toLowerCase() === "p"
-        ) {
-
-            togglePause();
-
-        }
-
-        if (
-            event.key.toLowerCase() === "l"
-        ) {
-
-            laserActive =
-                !laserActive;
-
-            player.trailEnabled =
-                laserActive;
-
-
-            if (
-                laserActive
-            ) {
-
-                playerTrail = [
-
-                    {
-                        x: player.x,
-                        y: player.y
-                    }
-
-                ];
-
-            } else {
-
-                playerTrail = [];
-
-            }
-
-        }
-
-    }
-);
-
-
-/* =========================================================
-   MOVE CYCLE
-   ========================================================= */
-
-function moveCycle(
-    cycle,
-    trail,
-    dt,
-    shouldLeaveTrail
-) {
-
-    cycle.dir =
-        cycle.nextDir;
-
-    const direction =
-        DIRECTIONS[cycle.dir];
-
-
-    cycle.x +=
-        direction.x *
-        cycle.speed *
-        dt;
-
-    cycle.y +=
-        direction.y *
-        cycle.speed *
-        dt;
-
-
-    if (
-        cycle.x < 0 ||
-        cycle.x > GRID_SIZE ||
-        cycle.y < 0 ||
-        cycle.y > GRID_SIZE
-    ) {
-
-        if (cycle === player) {
-
-            gameOver = true;
-
-            showMessage(
-                "CRASHED",
-                "You hit the arena wall"
-            );
-
-        } else {
-
-            gameOver = true;
-
-            showMessage(
-                "VICTORY",
-                "The red cycle crashed"
-            );
-
-        }
-
-        return;
-    }
-
-
-    if (shouldLeaveTrail) {
-
-        if (
-            trail.length === 0 ||
-            distanceBetween(
-                cycle.x,
-                cycle.y,
-                trail[
-                    trail.length - 1
-                ].x,
-                trail[
-                    trail.length - 1
-                ].y
-            ) > 0.08
-        ) {
-
-            trail.push({
-                x: cycle.x,
-                y: cycle.y
-            });
-
-        }
-
-    }
-
-
-    if (trail.length > 2500) {
-
-        trail.shift();
-
-    }
-
-}
-
-
-/* =========================================================
-   DISTANCE
-   ========================================================= */
-
-function distanceBetween(
-    x1,
-    y1,
-    x2,
-    y2
-) {
-
-    const dx =
-        x1 - x2;
-
-    const dy =
-        y1 - y2;
-
-    return Math.sqrt(
-        dx * dx +
-        dy * dy
-    );
-
-}
-
-
-/* =========================================================
-   TRAIL COLLISION
-   ========================================================= */
-
-function checkTrailCollision(
-    cycle,
-    trail
-) {
-
-    const checkDistance =
-        0.35;
-
-
-    for (
-        let i = 0;
-        i < trail.length - 5;
-        i++
-    ) {
-
-        const point =
-            trail[i];
-
-
-        if (
-            Math.abs(
-                cycle.x - point.x
-            ) < checkDistance &&
-
-            Math.abs(
-                cycle.y - point.y
-            ) < checkDistance
-        ) {
-
-            return true;
-
-        }
-
-    }
-
-
-    return false;
-
-}
-
-
-/* =========================================================
-   CYCLE COLLISION
-   ========================================================= */
-
-function checkCycleCollision() {
-
-    return (
-        distanceBetween(
-            player.x,
-            player.y,
-            enemy.x,
-            enemy.y
-        ) < 0.75
-    );
-
-}
-
-
-/* =========================================================
-   ENEMY AI
-   ========================================================= */
-
-function updateEnemyAI() {
-
-    const possibleDirections = [
-        "UP",
-        "DOWN",
-        "LEFT",
-        "RIGHT"
-    ];
-
-
-    const safeDirections =
-        possibleDirections.filter(
-            function(dir) {
-
-                if (
-                    isOpposite(
-                        enemy.dir,
-                        dir
-                    )
-                ) {
-                    return false;
-                }
-
-
-                const direction =
-                    DIRECTIONS[dir];
-
-
-                const testX =
-                    enemy.x +
-                    direction.x *
-                    1.5;
-
-                const testY =
-                    enemy.y +
-                    direction.y *
-                    1.5;
-
-
-                if (
-                    testX < 0.5 ||
-                    testX >
-                    GRID_SIZE - 0.5 ||
-
-                    testY < 0.5 ||
-                    testY >
-                    GRID_SIZE - 0.5
-                ) {
-                    return false;
-                }
-
-
-                if (
-                    checkPointAgainstTrail(
-                        testX,
-                        testY,
-                        enemyTrail
-                    )
-                ) {
-                    return false;
-                }
-
-
-                if (
-                    checkPointAgainstTrail(
-                        testX,
-                        testY,
-                        playerTrail
-                    )
-                ) {
-                    return false;
-                }
-
-
-                return true;
-
-            }
-        );
-
-
-    if (
-        safeDirections.length === 0
-    ) {
-        return;
-    }
-
-
-    const currentDirection =
-        enemy.dir;
-
-
-    if (
-        safeDirections.includes(
-            currentDirection
-        )
-    ) {
-
-        if (
-            Math.random() < 0.025
-        ) {
-
-            const turns =
-                safeDirections.filter(
-                    function(d) {
-                        return (
-                            d !==
-                            currentDirection
-                        );
-                    }
-                );
-
-
-            if (
-                turns.length > 0
-            ) {
-
-                enemy.nextDir =
-                    turns[
-                        Math.floor(
-                            Math.random() *
-                            turns.length
-                        )
-                    ];
-
-            }
-
-        }
-
-    } else {
-
-        enemy.nextDir =
-            safeDirections[
-                Math.floor(
-                    Math.random() *
-                    safeDirections.length
-                )
-            ];
-
-    }
-
-}
-
-
-/* =========================================================
-   TRAIL POINT CHECK
-   ========================================================= */
-
-function checkPointAgainstTrail(
-    x,
-    y,
-    trail
-) {
-
-    const checkDistance =
-        0.42;
-
-
-    for (
-        let i = 0;
-        i < trail.length;
-        i++
-    ) {
-
-        const point =
-            trail[i];
-
-
-        if (
-            Math.abs(
-                x - point.x
-            ) < checkDistance &&
-
-            Math.abs(
-                y - point.y
-            ) < checkDistance
-        ) {
-
-            return true;
-
-        }
-
-    }
-
-
-    return false;
-
-}
-
-
-/* =========================================================
-   RANDOM RED TRAIL
-   ========================================================= */
 
 function updateEnemyTrail(dt) {
+    enemyTrailTimer -= dt;
 
-    enemyTrailTimer += dt;
+    if (enemyTrailTimer <= 0) {
+        enemyTrailActive = !enemyTrailActive;
 
-
-    if (
-        enemyTrailTimer >=
-        enemyTrailNextChange
-    ) {
-
-        enemyTrailTimer = 0;
-
-        enemyTrailActive =
-            !enemyTrailActive;
-
-
-        enemyTrailNextChange =
-            randomEnemyTrailTime();
-
-
-        /*
-           RED TRAIL ON:
-           Start a completely new trail at the enemy's
-           exact current position.
-        */
-
-        if (
-            enemyTrailActive
-        ) {
-
+        if (enemyTrailActive) {
+            // Fresh red trail begins EXACTLY where the enemy is now.
             enemyTrail = [
-
                 {
                     x: enemy.x,
                     y: enemy.y
                 }
-
             ];
-
+        } else {
+            // Turning the red trail off completely removes it.
+            enemyTrail = [];
         }
 
+        setEnemyTrailTimer();
+    }
+
+    if (enemyTrailActive) {
+        const last = enemyTrail[enemyTrail.length - 1];
+
+        if (
+            !last ||
+            Math.hypot(
+                enemy.x - last.x,
+                enemy.y - last.y
+            ) > 0.08
+        ) {
+            enemyTrail.push({
+                x: enemy.x,
+                y: enemy.y
+            });
+        }
+    }
+}
+
+function updatePlayerTrail() {
+    if (!laserActive) return;
+
+    const last = playerTrail[playerTrail.length - 1];
+
+    if (
+        !last ||
+        Math.hypot(
+            player.x - last.x,
+            player.y - last.y
+        ) > 0.08
+    ) {
+        playerTrail.push({
+            x: player.x,
+            y: player.y
+        });
+    }
+}
+
+function checkWallCollision(cycle) {
+    return (
+        cycle.x < 0 ||
+        cycle.x >= GRID_SIZE ||
+        cycle.y < 0 ||
+        cycle.y >= GRID_SIZE
+    );
+}
+
+function pointToSegmentDistance(px, py, ax, ay, bx, by) {
+    const abx = bx - ax;
+    const aby = by - ay;
+
+    const apx = px - ax;
+    const apy = py - ay;
+
+    const abLengthSquared = abx * abx + aby * aby;
+
+    if (abLengthSquared === 0) {
+        return Math.hypot(px - ax, py - ay);
+    }
+
+    let t =
+        (apx * abx + apy * aby) /
+        abLengthSquared;
+
+    t = Math.max(0, Math.min(1, t));
+
+    const closestX = ax + abx * t;
+    const closestY = ay + aby * t;
+
+    return Math.hypot(
+        px - closestX,
+        py - closestY
+    );
+}
+
+function checkTrailCollision(cycle, trail) {
+    if (!trail || trail.length < 2) {
+        return false;
+    }
+
+    // Keep the newest few points out so a cycle doesn't
+    // immediately collide with the trail segment directly
+    // underneath its own head.
+    const end = Math.max(0, trail.length - 5);
+
+    for (let i = 0; i < end - 1; i++) {
+        const a = trail[i];
+        const b = trail[i + 1];
+
+        if (
+            pointToSegmentDistance(
+                cycle.x,
+                cycle.y,
+                a.x,
+                a.y,
+                b.x,
+                b.y
+            ) < 0.32
+        ) {
+            return true;
+        }
+    }
+
+    return false;
+}
+
+/*
+    IMPORTANT CHANGE:
+    Both trails are now dangerous to BOTH cycles.
+
+    Player:
+      - blue trail can kill player
+      - red trail can kill player
+
+    Enemy:
+      - blue trail can kill enemy
+      - red trail can kill enemy
+*/
+function checkCollisions() {
+
+    if (checkWallCollision(player)) {
+        endGame("YOU CRASHED!");
+        return true;
+    }
+
+    if (checkWallCollision(enemy)) {
+        endGame("RED CYCLE CRASHED!");
+        return true;
+    }
+
+    // BLUE TRAIL
+    // Dangerous to both player AND enemy.
+    if (laserActive && playerTrail.length >= 2) {
+
+        if (checkTrailCollision(player, playerTrail)) {
+            endGame("YOU HIT THE BLUE TRAIL!");
+            return true;
+        }
+
+        if (checkTrailCollision(enemy, playerTrail)) {
+            endGame("RED CYCLE HIT THE BLUE TRAIL!");
+            return true;
+        }
+    }
+
+    // RED TRAIL
+    // Dangerous to both enemy AND player.
+    if (enemyTrailActive && enemyTrail.length >= 2) {
+
+        if (checkTrailCollision(player, enemyTrail)) {
+            endGame("YOU HIT THE RED TRAIL!");
+            return true;
+        }
+
+        if (checkTrailCollision(enemy, enemyTrail)) {
+            endGame("RED CYCLE HIT ITS TRAIL!");
+            return true;
+        }
+    }
+
+    return false;
+}
+
+function enemyAI() {
+    const possibleDirections = [
+        { x: 1, y: 0 },
+        { x: -1, y: 0 },
+        { x: 0, y: 1 },
+        { x: 0, y: -1 }
+    ];
+
+    const validDirections = possibleDirections.filter(d => {
+
+        if (
+            d.x === -enemy.dir.x &&
+            d.y === -enemy.dir.y
+        ) {
+            return false;
+        }
+
+        const lookAhead = 1.5;
+
+        const nx = enemy.x + d.x * lookAhead;
+        const ny = enemy.y + d.y * lookAhead;
+
+        if (
+            nx < 0.7 ||
+            nx > GRID_SIZE - 0.7 ||
+            ny < 0.7 ||
+            ny > GRID_SIZE - 0.7
+        ) {
+            return false;
+        }
 
         /*
-           RED TRAIL OFF:
-           Completely erase the old red trail.
+            The enemy treats BOTH trails as dangerous.
         */
-
-        else {
-
-            enemyTrail = [];
-
+        if (
+            checkTrailCollision(
+                { x: nx, y: ny },
+                playerTrail
+            )
+        ) {
+            return false;
         }
 
-    }
-
-}
-
-
-/* =========================================================
-   UPDATE
-   ========================================================= */
-
-function update(dt) {
-
-    if (
-        paused ||
-        gameOver
-    ) {
-        return;
-    }
-
-
-    survivalTime += dt;
-
-
-    updateEnemyTrail(dt);
-
-
-    updateEnemyAI();
-
-
-    moveCycle(
-        player,
-        playerTrail,
-        dt,
-        player.trailEnabled
-    );
-
-
-    moveCycle(
-        enemy,
-        enemyTrail,
-        dt,
-        enemyTrailActive
-    );
-
-
-    if (gameOver) {
-        return;
-    }
-
-
-    if (
-        player.trailEnabled &&
-        checkTrailCollision(
-            enemy,
-            playerTrail
-        )
-    ) {
-
-        gameOver = true;
-
-        showMessage(
-            "VICTORY",
-            "The red cycle hit your blue trail"
-        );
-
-        return;
-
-    }
-
-
-    if (
-        enemyTrailActive &&
-        checkTrailCollision(
-            player,
-            enemyTrail
-        )
-    ) {
-
-        gameOver = true;
-
-        showMessage(
-            "CRASHED",
-            "You hit the red light trail"
-        );
-
-        return;
-
-    }
-
-
-    if (
-        checkCycleCollision()
-    ) {
-
-        gameOver = true;
-
-        showMessage(
-            "CRASH",
-            "The cycles collided"
-        );
-
-    }
-
-}
-
-
-/* =========================================================
-   BACKGROUND
-   ========================================================= */
-
-function drawBackground() {
-
-    const gradient =
-        ctx.createRadialGradient(
-            width / 2,
-            height / 2,
-            20,
-            width / 2,
-            height / 2,
-            Math.max(
-                width,
-                height
-            ) * 0.7
-        );
-
-
-    gradient.addColorStop(
-        0,
-        "#041d3a"
-    );
-
-    gradient.addColorStop(
-        0.5,
-        "#020d24"
-    );
-
-    gradient.addColorStop(
-        1,
-        "#01030b"
-    );
-
-
-    ctx.fillStyle =
-        gradient;
-
-    ctx.fillRect(
-        0,
-        0,
-        width,
-        height
-    );
-
-
-    ctx.save();
-
-    ctx.globalAlpha = 0.18;
-
-
-    for (
-        let i = 0;
-        i < 12;
-        i++
-    ) {
-
-        const x =
-            (
-                i * 173 +
-                performance.now() *
-                0.012
-            ) % width;
-
-
-        const y =
-            (
-                i * 97
-            ) % height;
-
-
-        const radius =
-            80 +
-            (i % 4) * 35;
-
-
-        const glow =
-            ctx.createRadialGradient(
-                x,
-                y,
-                0,
-                x,
-                y,
-                radius
-            );
-
-
-        glow.addColorStop(
-            0,
-            "rgba(0,150,255,0.5)"
-        );
-
-        glow.addColorStop(
-            1,
-            "rgba(0,50,255,0)"
-        );
-
-
-        ctx.fillStyle =
-            glow;
-
-
-        ctx.beginPath();
-
-        ctx.arc(
-            x,
-            y,
-            radius,
-            0,
-            Math.PI * 2
-        );
-
-        ctx.fill();
-
-    }
-
-
-    ctx.restore();
-
-}
-
-
-/* =========================================================
-   ARENA
-   ========================================================= */
-
-function drawArena() {
-
-    ctx.save();
-
-
-    ctx.shadowBlur = 25;
-
-    ctx.shadowColor =
-        "rgba(0,130,255,0.8)";
-
-
-    ctx.strokeStyle =
-        "#087cff";
-
-    ctx.lineWidth = 3;
-
-
-    ctx.strokeRect(
-        arenaLeft,
-        arenaTop,
-        arenaSize,
-        arenaSize
-    );
-
-
-    ctx.shadowBlur = 0;
-
-
-    ctx.fillStyle =
-        "rgba(0,3,10,0.78)";
-
-
-    ctx.fillRect(
-        arenaLeft,
-        arenaTop,
-        arenaSize,
-        arenaSize
-    );
-
-
-    for (
-        let i = 0;
-        i <= GRID_SIZE;
-        i++
-    ) {
-
-        const position =
-            arenaLeft +
-            i * cellSize;
-
-
-        ctx.beginPath();
-
-        ctx.moveTo(
-            position,
-            arenaTop
-        );
-
-        ctx.lineTo(
-            position,
-            arenaTop +
-            arenaSize
-        );
-
-
-        ctx.strokeStyle =
-            i === 0 ||
-            i === GRID_SIZE
-
-                ? "rgba(0,170,255,0.7)"
-
-                : "rgba(0,100,190,0.25)";
-
-
-        ctx.lineWidth =
-            i === 0 ||
-            i === GRID_SIZE
-
-                ? 2
-
-                : 1;
-
-
-        ctx.stroke();
-
-    }
-
-
-    for (
-        let i = 0;
-        i <= GRID_SIZE;
-        i++
-    ) {
-
-        const position =
-            arenaTop +
-            i * cellSize;
-
-
-        ctx.beginPath();
-
-        ctx.moveTo(
-            arenaLeft,
-            position
-        );
-
-        ctx.lineTo(
-            arenaLeft +
-            arenaSize,
-            position
-        );
-
-
-        ctx.strokeStyle =
-            i === 0 ||
-            i === GRID_SIZE
-
-                ? "rgba(0,170,255,0.7)"
-
-                : "rgba(0,100,190,0.25)";
-
-
-        ctx.lineWidth =
-            i === 0 ||
-            i === GRID_SIZE
-
-                ? 2
-
-                : 1;
-
-
-        ctx.stroke();
-
-    }
-
-
-    ctx.restore();
-
-}
-
-
-/* =========================================================
-   TRAIL
-   ========================================================= */
-
-function drawTrail(
-    trail,
-    color
-) {
-
-    if (
-        trail.length < 2
-    ) {
-        return;
-    }
-
-
-    ctx.save();
-
-    ctx.lineJoin =
-        "round";
-
-    ctx.lineCap =
-        "round";
-
-
-    ctx.beginPath();
-
-
-    for (
-        let i = 0;
-        i < trail.length;
-        i++
-    ) {
-
-        const point =
-            gridToPixel(
-                trail[i].x,
-                trail[i].y
-            );
-
-
-        if (i === 0) {
-
-            ctx.moveTo(
-                point.x,
-                point.y
-            );
-
-        } else {
-
-            ctx.lineTo(
-                point.x,
-                point.y
-            );
-
+        if (
+            checkTrailCollision(
+                { x: nx, y: ny },
+                enemyTrail
+            )
+        ) {
+            return false;
         }
 
+        return true;
+    });
+
+    if (validDirections.length === 0) {
+        return;
     }
 
+    const current = validDirections.find(d =>
+        d.x === enemy.dir.x &&
+        d.y === enemy.dir.y
+    );
 
-    ctx.strokeStyle =
-        color;
-
-    ctx.lineWidth =
-        TRAIL_WIDTH + 10;
-
-    ctx.globalAlpha =
-        0.22;
-
-    ctx.shadowBlur =
-        25;
-
-    ctx.shadowColor =
-        color;
-
-    ctx.stroke();
-
-
-    ctx.beginPath();
-
-
-    for (
-        let i = 0;
-        i < trail.length;
-        i++
-    ) {
-
-        const point =
-            gridToPixel(
-                trail[i].x,
-                trail[i].y
-            );
-
-
-        if (i === 0) {
-
-            ctx.moveTo(
-                point.x,
-                point.y
-            );
-
-        } else {
-
-            ctx.lineTo(
-                point.x,
-                point.y
-            );
-
-        }
-
+    if (current && Math.random() > 0.08) {
+        return;
     }
 
+    // Occasionally steer toward the player,
+    // while still avoiding both trails.
+    const towardPlayer = validDirections
+        .slice()
+        .sort((a, b) => {
 
-    ctx.globalAlpha =
-        0.9;
+            const da =
+                Math.abs(
+                    enemy.x + a.x * 4 - player.x
+                ) +
+                Math.abs(
+                    enemy.y + a.y * 4 - player.y
+                );
 
-    ctx.shadowBlur =
-        12;
+            const db =
+                Math.abs(
+                    enemy.x + b.x * 4 - player.x
+                ) +
+                Math.abs(
+                    enemy.y + b.y * 4 - player.y
+                );
 
-    ctx.shadowColor =
-        color;
+            return da - db;
+        });
 
-    ctx.strokeStyle =
-        color;
-
-    ctx.lineWidth =
-        TRAIL_WIDTH;
-
-    ctx.stroke();
-
-
-    ctx.globalAlpha =
-        0.9;
-
-    ctx.shadowBlur =
-        5;
-
-    ctx.shadowColor =
-        "#ffffff";
-
-    ctx.strokeStyle =
-        "#dff8ff";
-
-    ctx.lineWidth =
-        1.5;
-
-    ctx.stroke();
-
-
-    ctx.restore();
-
+    if (Math.random() < 0.55 && towardPlayer.length) {
+        enemy.dir = towardPlayer[0];
+    } else {
+        enemy.dir =
+            validDirections[
+                Math.floor(
+                    Math.random() *
+                    validDirections.length
+                )
+            ];
+    }
 }
 
+function endGame(message) {
+    if (gameOver) return;
 
-/* =========================================================
-   CYCLE
-   ========================================================= */
+    gameOver = true;
+    gameRunning = false;
 
-function drawCycle(cycle) {
+    messageText.textContent = message;
+    gameMessage.style.display = "flex";
+}
 
-    const center =
-        gridToPixel(
-            cycle.x,
-            cycle.y
-        );
-
-
-    const length =
-        cellSize * 0.92;
-
-
-    const thickness =
-        Math.max(
-            7,
-            cellSize * 0.25
-        );
-
-
-    let angle = 0;
-
-
-    if (
-        cycle.dir === "UP"
-    ) {
-
-        angle =
-            -Math.PI / 2;
-
-    }
-
-
-    if (
-        cycle.dir === "DOWN"
-    ) {
-
-        angle =
-            Math.PI / 2;
-
-    }
-
-
-    if (
-        cycle.dir === "LEFT"
-    ) {
-
-        angle =
-            Math.PI;
-
-    }
-
-
-    if (
-        cycle.dir === "RIGHT"
-    ) {
-
-        angle = 0;
-
-    }
-
-
+function drawGrid() {
     ctx.save();
 
-
-    ctx.translate(
-        center.x,
-        center.y
-    );
-
-    ctx.rotate(angle);
-
-
-    ctx.shadowBlur =
-        24;
-
-    ctx.shadowColor =
-        cycle.color;
-
-    ctx.fillStyle =
-        cycle.color;
-
-
-    ctx.beginPath();
-
-    ctx.roundRect(
-        -length / 2,
-        -thickness / 2,
-        length,
-        thickness,
-        thickness / 2
-    );
-
-    ctx.fill();
-
-
-    ctx.shadowBlur = 0;
-
-    ctx.fillStyle =
-        "#02040a";
-
-
-    ctx.beginPath();
-
-    ctx.roundRect(
-        -length / 2 + 3,
-        -thickness / 2 + 2,
-        length - 6,
-        thickness - 4,
-        thickness / 2
-    );
-
-    ctx.fill();
-
-
-    ctx.fillStyle =
-        cycle.core;
-
-    ctx.shadowBlur =
-        10;
-
-    ctx.shadowColor =
-        cycle.color;
-
-
-    ctx.beginPath();
-
-    ctx.roundRect(
-        -length / 2 + 4,
-        -1,
-        length - 8,
-        2,
-        1
-    );
-
-    ctx.fill();
-
-
-    ctx.fillStyle =
-        cycle.color;
-
-    ctx.shadowBlur =
-        18;
-
-
-    ctx.beginPath();
-
-    ctx.arc(
-        length / 2 - 2,
-        0,
-        thickness * 0.28,
-        0,
-        Math.PI * 2
-    );
-
-    ctx.fill();
-
-
-    ctx.restore();
-
-}
-
-
-/* =========================================================
-   FORMAT STOPWATCH
-   ========================================================= */
-
-function formatTime(seconds) {
-
-    const totalMilliseconds =
-        Math.floor(
-            seconds * 1000
-        );
-
-
-    const minutes =
-        Math.floor(
-            totalMilliseconds /
-            60000
-        );
-
-
-    const remainingAfterMinutes =
-        totalMilliseconds %
-        60000;
-
-
-    const secs =
-        Math.floor(
-            remainingAfterMinutes /
-            1000
-        );
-
-
-    const milliseconds =
-        Math.floor(
-            (
-                remainingAfterMinutes %
-                1000
-            ) / 10
-        );
-
-
-    return (
-        String(minutes).padStart(2, "0") +
-        ":" +
-        String(secs).padStart(2, "0") +
-        "." +
-        String(milliseconds).padStart(2, "0")
-    );
-
-}
-
-
-/* =========================================================
-   HUD
-   ========================================================= */
-
-function drawHUD() {
-
-    ctx.save();
-
-
-    const timerText =
-        formatTime(
-            survivalTime
-        );
-
-
-    const timerX =
-        width / 2;
-
-    const timerY =
-        25;
-
-
-    ctx.font =
-        "bold 17px Arial";
-
-    ctx.textAlign =
-        "center";
-
-    ctx.textBaseline =
-        "middle";
-
-
-    const boxWidth = 112;
-    const boxHeight = 34;
-
-
-    ctx.fillStyle =
-        "rgba(0,8,22,0.82)";
-
-
-    ctx.strokeStyle =
-        "rgba(70,190,255,0.65)";
-
-
+    ctx.strokeStyle = "rgba(0, 110, 255, 0.12)";
     ctx.lineWidth = 1;
 
+    for (let i = 0; i <= GRID_SIZE; i++) {
+        const p = i * cellSize;
+
+        ctx.beginPath();
+        ctx.moveTo(p, 0);
+        ctx.lineTo(p, canvasSize);
+        ctx.stroke();
+
+        ctx.beginPath();
+        ctx.moveTo(0, p);
+        ctx.lineTo(canvasSize, p);
+        ctx.stroke();
+    }
+
+    ctx.restore();
+}
+
+function drawTrail(trail, color) {
+    if (!trail || trail.length < 2) {
+        return;
+    }
+
+    ctx.save();
+
+    ctx.lineCap = "round";
+    ctx.lineJoin = "round";
+
+    ctx.shadowColor = color;
+    ctx.shadowBlur = 16;
+
+    ctx.strokeStyle = color;
+    ctx.lineWidth = Math.max(3, cellSize * 0.25);
 
     ctx.beginPath();
 
-    ctx.roundRect(
-        timerX - boxWidth / 2,
-        timerY,
-        boxWidth,
-        boxHeight,
-        8
+    ctx.moveTo(
+        trail[0].x * cellSize,
+        trail[0].y * cellSize
     );
 
-    ctx.fill();
+    for (let i = 1; i < trail.length; i++) {
+        ctx.lineTo(
+            trail[i].x * cellSize,
+            trail[i].y * cellSize
+        );
+    }
+
     ctx.stroke();
-
-
-    ctx.fillStyle =
-        "#8de4ff";
-
-    ctx.shadowBlur =
-        10;
-
-    ctx.shadowColor =
-        "#229dff";
-
-
-    ctx.fillText(
-        timerText,
-        timerX,
-        timerY +
-        boxHeight / 2
-    );
-
 
     ctx.shadowBlur = 0;
 
-    ctx.textAlign =
-        "left";
+    ctx.strokeStyle = "#ffffff";
+    ctx.lineWidth = Math.max(1, cellSize * 0.07);
 
-    ctx.font =
-        "bold 12px Arial";
+    ctx.beginPath();
 
-    ctx.fillStyle =
-        "rgba(150,220,255,0.8)";
-
-
-    ctx.fillText(
-        "25 × 25",
-        arenaLeft,
-        arenaTop - 12
+    ctx.moveTo(
+        trail[0].x * cellSize,
+        trail[0].y * cellSize
     );
 
-
-    if (
-        laserActive
-    ) {
-
-        ctx.textAlign =
-            "right";
-
-        ctx.fillStyle =
-            "#67dfff";
-
-        ctx.shadowBlur =
-            10;
-
-        ctx.shadowColor =
-            "#39caff";
-
-
-        ctx.fillText(
-            "LASER ACTIVE",
-            arenaLeft +
-            arenaSize,
-            arenaTop - 12
+    for (let i = 1; i < trail.length; i++) {
+        ctx.lineTo(
+            trail[i].x * cellSize,
+            trail[i].y * cellSize
         );
-
     }
 
-
-    ctx.textAlign =
-        "left";
-
-    ctx.font =
-        "bold 10px Arial";
-
-
-    if (
-        enemyTrailActive
-    ) {
-
-        ctx.fillStyle =
-            "rgba(255,70,90,0.7)";
-
-        ctx.fillText(
-            "RED TRAIL ON",
-            arenaLeft,
-            arenaTop +
-            arenaSize +
-            18
-        );
-
-    } else {
-
-        ctx.fillStyle =
-            "rgba(255,70,90,0.35)";
-
-        ctx.fillText(
-            "RED TRAIL OFF",
-            arenaLeft,
-            arenaTop +
-            arenaSize +
-            18
-        );
-
-    }
-
+    ctx.stroke();
 
     ctx.restore();
-
 }
 
+function drawCycle(cycle, mainColor, darkColor) {
+    const x = cycle.x * cellSize;
+    const y = cycle.y * cellSize;
 
-/* =========================================================
-   MESSAGE
-   ========================================================= */
+    const angle =
+        Math.atan2(cycle.dir.y, cycle.dir.x);
 
-function showMessage(
-    title,
-    text
-) {
+    ctx.save();
 
-    messageTitle.textContent =
-        title;
+    ctx.translate(x, y);
+    ctx.rotate(angle);
 
-    messageText.textContent =
-        text;
+    ctx.shadowColor = mainColor;
+    ctx.shadowBlur = 18;
 
-    message.style.opacity =
-        "1";
+    // Black body
+    ctx.fillStyle = darkColor;
 
+    ctx.fillRect(
+        -cellSize * 0.55,
+        -cellSize * 0.22,
+        cellSize * 1.1,
+        cellSize * 0.44
+    );
+
+    // Neon light
+    ctx.fillStyle = mainColor;
+
+    ctx.fillRect(
+        -cellSize * 0.58,
+        -cellSize * 0.12,
+        cellSize * 1.16,
+        cellSize * 0.24
+    );
+
+    // Front light
+    ctx.fillRect(
+        cellSize * 0.32,
+        -cellSize * 0.25,
+        cellSize * 0.28,
+        cellSize * 0.5
+    );
+
+    ctx.restore();
 }
-
-
-function hideMessage() {
-
-    message.style.opacity =
-        "0";
-
-}
-
-
-/* =========================================================
-   DRAW
-   ========================================================= */
 
 function draw() {
-
     ctx.clearRect(
         0,
         0,
-        width,
-        height
+        canvasSize,
+        canvasSize
     );
 
+    drawGrid();
 
-    drawBackground();
-
-    drawArena();
-
-
-    if (
-        enemyTrailActive
-    ) {
-
-        drawTrail(
-            enemyTrail,
-            ENEMY_COLOR
-        );
-
+    // Blue player trail
+    if (laserActive) {
+        drawTrail(playerTrail, "#00c8ff");
     }
 
-
-    if (
-        player.trailEnabled
-    ) {
-
-        drawTrail(
-            playerTrail,
-            PLAYER_COLOR
-        );
-
+    // Red enemy trail
+    if (enemyTrailActive) {
+        drawTrail(enemyTrail, "#ff2222");
     }
 
+    drawCycle(
+        player,
+        "#00c8ff",
+        "#00141f"
+    );
 
-    drawCycle(enemy);
-
-    drawCycle(player);
-
-
-    drawHUD();
-
+    drawCycle(
+        enemy,
+        "#ff2222",
+        "#200000"
+    );
 }
 
+function update(dt) {
+    if (!gameRunning || gameOver) {
+        return;
+    }
 
-/* =========================================================
-   MAIN LOOP
-   ========================================================= */
+    survivalTime += dt;
 
-function loop(time) {
+    moveCycle(player, dt);
+    moveCycle(enemy, dt);
 
-    const dt =
-        Math.min(
-            (time - lastTime) / 1000,
-            0.04
-        );
+    updatePlayerTrail();
+    updateEnemyTrail(dt);
 
+    enemyAI();
 
-    lastTime =
-        time;
+    checkCollisions();
 
+    updateHUD();
+}
+
+function gameLoop(now) {
+    const dt = Math.min(
+        (now - lastTime) / 1000,
+        0.05
+    );
+
+    lastTime = now;
 
     update(dt);
-
     draw();
 
-
-    requestAnimationFrame(
-        loop
-    );
-
+    requestAnimationFrame(gameLoop);
 }
 
+function toggleLaser() {
+    if (!gameRunning || gameOver) return;
 
-/* =========================================================
-   START GAME
-   ========================================================= */
+    laserActive = !laserActive;
 
-resize();
+    if (laserActive) {
+        // Fresh blue trail begins EXACTLY where player is now.
+        playerTrail = [
+            {
+                x: player.x,
+                y: player.y
+            }
+        ];
+    } else {
+        // Turning blue trail off completely removes it.
+        playerTrail = [];
+    }
+
+    updateHUD();
+}
+
+function togglePause() {
+    if (gameOver) return;
+
+    gameRunning = !gameRunning;
+
+    if (gameRunning) {
+        pauseMenu.style.display = "none";
+        lastTime = performance.now();
+    } else {
+        pauseMenu.style.display = "flex";
+    }
+}
+
+pauseButton.addEventListener("pointerdown", e => {
+    e.preventDefault();
+    e.stopPropagation();
+});
+
+pauseButton.addEventListener("pointerup", e => {
+    e.preventDefault();
+    e.stopPropagation();
+    togglePause();
+});
+
+resumeButton.addEventListener("pointerdown", e => {
+    e.preventDefault();
+    e.stopPropagation();
+
+    if (!gameOver) {
+        gameRunning = true;
+        pauseMenu.style.display = "none";
+        lastTime = performance.now();
+    }
+});
+
+restartButton.addEventListener("pointerdown", e => {
+    e.preventDefault();
+    e.stopPropagation();
+    resetGame();
+});
+
+canvas.addEventListener("pointerdown", e => {
+    pointerStartX = e.clientX;
+    pointerStartY = e.clientY;
+});
+
+canvas.addEventListener("pointerup", e => {
+    const dx = e.clientX - pointerStartX;
+    const dy = e.clientY - pointerStartY;
+
+    const distance = Math.hypot(dx, dy);
+
+    if (distance < SWIPE_DISTANCE) {
+        return;
+    }
+
+    if (!gameRunning || gameOver) {
+        return;
+    }
+
+    if (Math.abs(dx) > Math.abs(dy)) {
+        if (dx > 0) {
+            changeDirection(1, 0);
+        } else {
+            changeDirection(-1, 0);
+        }
+    } else {
+        if (dy > 0) {
+            changeDirection(0, 1);
+        } else {
+            changeDirection(0, -1);
+        }
+    }
+});
+
+canvas.addEventListener("pointerup", e => {
+    const dx = e.clientX - pointerStartX;
+    const dy = e.clientY - pointerStartY;
+
+    const distance = Math.hypot(dx, dy);
+
+    if (distance >= SWIPE_DISTANCE) {
+        return;
+    }
+
+    if (!gameRunning || gameOver) {
+        return;
+    }
+
+    tapCount++;
+
+    if (tapCount === 1) {
+        tapTimer = setTimeout(() => {
+            tapCount = 0;
+        }, TRIPLE_TAP_TIME);
+    }
+
+    if (tapCount === 3) {
+        clearTimeout(tapTimer);
+        tapTimer = null;
+        tapCount = 0;
+
+        toggleLaser();
+    }
+});
+
+document.addEventListener("keydown", e => {
+
+    if (
+        e.key === "ArrowUp" ||
+        e.key.toLowerCase() === "w"
+    ) {
+        changeDirection(0, -1);
+    }
+
+    if (
+        e.key === "ArrowDown" ||
+        e.key.toLowerCase() === "s"
+    ) {
+        changeDirection(0, 1);
+    }
+
+    if (
+        e.key === "ArrowLeft" ||
+        e.key.toLowerCase() === "a"
+    ) {
+        changeDirection(-1, 0);
+    }
+
+    if (
+        e.key === "ArrowRight" ||
+        e.key.toLowerCase() === "d"
+    ) {
+        changeDirection(1, 0);
+    }
+
+    if (e.key === " " || e.key.toLowerCase() === "p") {
+        e.preventDefault();
+        togglePause();
+    }
+
+    if (e.key.toLowerCase() === "l") {
+        toggleLaser();
+    }
+});
 
 resetGame();
-
-requestAnimationFrame(
-    loop
-);
-
+requestAnimationFrame(gameLoop);
 </script>
 
 </body>
