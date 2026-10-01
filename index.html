@@ -58,10 +58,6 @@
         display: block;
     }
 
-    /* =====================================================
-       PAUSE BUTTON
-       ===================================================== */
-
     #pauseButton {
         position: absolute;
         top: 18px;
@@ -89,7 +85,6 @@
         justify-content: center;
 
         touch-action: manipulation;
-
         cursor: pointer;
     }
 
@@ -97,10 +92,6 @@
         transform: scale(0.94);
         background: rgba(0, 35, 65, 0.95);
     }
-
-    /* =====================================================
-       PAUSE MENU
-       ===================================================== */
 
     #pauseMenu {
         position: absolute;
@@ -178,7 +169,6 @@
             0 0 12px rgba(0, 120, 255, 0.18);
 
         cursor: pointer;
-
         touch-action: manipulation;
     }
 
@@ -186,10 +176,6 @@
         transform: scale(0.97);
         background: rgba(0, 65, 115, 0.8);
     }
-
-    /* =====================================================
-       MESSAGE
-       ===================================================== */
 
     #message {
         position: absolute;
@@ -236,22 +222,17 @@
 
     <canvas id="canvas"></canvas>
 
-    <!-- PAUSE -->
     <button
         id="pauseButton"
         type="button"
         aria-label="Pause game"
     >Ⅱ</button>
 
-
-    <!-- MESSAGE -->
     <div id="message">
         <h2 id="messageTitle"></h2>
         <p id="messageText"></p>
     </div>
 
-
-    <!-- PAUSE MENU -->
     <div id="pauseMenu">
 
         <div id="pausePanel">
@@ -407,15 +388,6 @@ let enemyTrailTimer = 0;
 
 let enemyTrailNextChange = 0;
 
-
-/*
-    These values make the red trail randomly
-    turn on and off.
-
-    It can stay off for a random amount of time,
-    then turn on for a random amount of time.
-*/
-
 const ENEMY_TRAIL_MIN_TIME = 0.7;
 const ENEMY_TRAIL_MAX_TIME = 2.8;
 
@@ -510,11 +482,6 @@ function resetGame() {
     laserActive = false;
     player.trailEnabled = false;
 
-
-    /*
-        Start the red cycle with its trail ON.
-    */
-
     enemyTrailActive = true;
 
     enemyTrailTimer = 0;
@@ -522,13 +489,7 @@ function resetGame() {
     enemyTrailNextChange =
         randomEnemyTrailTime();
 
-
-    /*
-        Reset stopwatch.
-    */
-
     survivalTime = 0;
-
 
     paused = false;
     gameOver = false;
@@ -575,10 +536,8 @@ function resize() {
         0
     );
 
-
     arenaSize =
         Math.min(width, height) * 0.82;
-
 
     arenaSize =
         Math.max(
@@ -588,7 +547,6 @@ function resize() {
                 Math.min(width, height) - 50
             )
         );
-
 
     arenaLeft =
         (width - arenaSize) / 2;
@@ -658,10 +616,6 @@ function changePlayerDirection(newDirection) {
         return;
     }
 
-    /*
-        Never allow a direct 180° turn.
-    */
-
     if (
         isOpposite(
             player.dir,
@@ -691,10 +645,6 @@ const SWIPE_TIME = 700;
 game.addEventListener(
     "pointerdown",
     function(event) {
-
-        /*
-            Ignore the pause button and pause menu.
-        */
 
         if (
             event.target === pauseButton ||
@@ -760,10 +710,6 @@ game.addEventListener(
         }
 
 
-        /*
-            Horizontal swipe.
-        */
-
         if (
             Math.abs(dx) >
             Math.abs(dy)
@@ -783,13 +729,7 @@ game.addEventListener(
 
             }
 
-        }
-
-        /*
-            Vertical swipe.
-        */
-
-        else {
+        } else {
 
             if (dy > 0) {
 
@@ -812,10 +752,13 @@ game.addEventListener(
 
 
 /* =========================================================
-   DOUBLE TAP = BLUE TRAIL
+   TRIPLE TAP = BLUE TRAIL
    ========================================================= */
 
-let lastTap = 0;
+let tapCount = 0;
+let tapTimer = null;
+
+const TRIPLE_TAP_TIME = 500;
 
 
 game.addEventListener(
@@ -833,13 +776,49 @@ game.addEventListener(
             return;
         }
 
-        const now =
-            performance.now();
+        const dx =
+            event.clientX -
+            touchStartX;
+
+        const dy =
+            event.clientY -
+            touchStartY;
+
+        const distance =
+            Math.sqrt(
+                dx * dx +
+                dy * dy
+            );
+
+        /* Only count taps, not swipes. */
+        if (
+            distance >= SWIPE_DISTANCE
+        ) {
+            return;
+        }
+
+        tapCount++;
+
+        clearTimeout(tapTimer);
+
+        tapTimer = setTimeout(
+            function() {
+
+                tapCount = 0;
+
+            },
+            TRIPLE_TAP_TIME
+        );
 
 
         if (
-            now - lastTap < 320
+            tapCount === 3
         ) {
+
+            tapCount = 0;
+
+            clearTimeout(tapTimer);
+
 
             laserActive =
                 !laserActive;
@@ -847,10 +826,43 @@ game.addEventListener(
             player.trailEnabled =
                 laserActive;
 
+
+            /* =============================================
+               LASER TURNED ON
+
+               Start a completely new trail at the exact
+               position of the player at this moment.
+               ============================================= */
+
+            if (
+                laserActive
+            ) {
+
+                playerTrail = [
+
+                    {
+                        x: player.x,
+                        y: player.y
+                    }
+
+                ];
+
+            }
+
+
+            /* =============================================
+               LASER TURNED OFF
+
+               Completely erase the trail immediately.
+               ============================================= */
+
+            else {
+
+                playerTrail = [];
+
+            }
+
         }
-
-
-        lastTap = now;
 
     }
 );
@@ -859,11 +871,6 @@ game.addEventListener(
 /* =========================================================
    PAUSE BUTTON
    ========================================================= */
-
-/*
-    IMPORTANT:
-    Stop the event from reaching the game swipe handlers.
-*/
 
 pauseButton.addEventListener(
     "pointerdown",
@@ -921,11 +928,6 @@ function togglePause() {
 
         pauseMenu.style.display =
             "none";
-
-        /*
-            Prevent the stopwatch from
-            jumping forward after unpausing.
-        */
 
         lastTime =
             performance.now();
@@ -992,7 +994,6 @@ window.addEventListener(
 
         }
 
-
         if (
             event.key === "ArrowDown" ||
             event.key.toLowerCase() === "s"
@@ -1001,7 +1002,6 @@ window.addEventListener(
             changePlayerDirection("DOWN");
 
         }
-
 
         if (
             event.key === "ArrowLeft" ||
@@ -1012,7 +1012,6 @@ window.addEventListener(
 
         }
 
-
         if (
             event.key === "ArrowRight" ||
             event.key.toLowerCase() === "d"
@@ -1021,7 +1020,6 @@ window.addEventListener(
             changePlayerDirection("RIGHT");
 
         }
-
 
         if (
             event.key === " " ||
@@ -1032,7 +1030,6 @@ window.addEventListener(
 
         }
 
-
         if (
             event.key.toLowerCase() === "l"
         ) {
@@ -1042,6 +1039,26 @@ window.addEventListener(
 
             player.trailEnabled =
                 laserActive;
+
+
+            if (
+                laserActive
+            ) {
+
+                playerTrail = [
+
+                    {
+                        x: player.x,
+                        y: player.y
+                    }
+
+                ];
+
+            } else {
+
+                playerTrail = [];
+
+            }
 
         }
 
@@ -1078,10 +1095,6 @@ function moveCycle(
         dt;
 
 
-    /*
-        Arena collision.
-    */
-
     if (
         cycle.x < 0 ||
         cycle.x > GRID_SIZE ||
@@ -1113,11 +1126,6 @@ function moveCycle(
     }
 
 
-    /*
-        Only record a trail if the cycle's
-        light trail is currently ON.
-    */
-
     if (shouldLeaveTrail) {
 
         if (
@@ -1143,10 +1151,6 @@ function moveCycle(
 
     }
 
-
-    /*
-        Keep memory under control.
-    */
 
     if (trail.length > 2500) {
 
@@ -1223,7 +1227,6 @@ function checkTrailCollision(
 
 
     return false;
-
 }
 
 
@@ -1301,10 +1304,6 @@ function updateEnemyAI() {
                 }
 
 
-                /*
-                    Avoid the red trail.
-                */
-
                 if (
                     checkPointAgainstTrail(
                         testX,
@@ -1315,10 +1314,6 @@ function updateEnemyAI() {
                     return false;
                 }
 
-
-                /*
-                    Avoid the blue trail.
-                */
 
                 if (
                     checkPointAgainstTrail(
@@ -1488,33 +1483,14 @@ function update(dt) {
     }
 
 
-    /*
-        Stopwatch.
-    */
-
     survivalTime += dt;
 
-
-    /*
-        Random red trail.
-    */
 
     updateEnemyTrail(dt);
 
 
-    /*
-        Enemy AI.
-    */
-
     updateEnemyAI();
 
-
-    /*
-        Player movement.
-
-        The player's trail only gets recorded
-        when double-tap laser is active.
-    */
 
     moveCycle(
         player,
@@ -1523,12 +1499,6 @@ function update(dt) {
         player.trailEnabled
     );
 
-
-    /*
-        Enemy movement.
-
-        The red trail is controlled randomly.
-    */
 
     moveCycle(
         enemy,
@@ -1542,10 +1512,6 @@ function update(dt) {
         return;
     }
 
-
-    /*
-        Blue player trail hits red cycle.
-    */
 
     if (
         player.trailEnabled &&
@@ -1567,10 +1533,6 @@ function update(dt) {
     }
 
 
-    /*
-        Red trail hits player.
-    */
-
     if (
         enemyTrailActive &&
         checkTrailCollision(
@@ -1590,10 +1552,6 @@ function update(dt) {
 
     }
 
-
-    /*
-        Cycle-to-cycle collision.
-    */
 
     if (
         checkCycleCollision()
@@ -1657,10 +1615,6 @@ function drawBackground() {
         height
     );
 
-
-    /*
-        Blue neon atmosphere.
-    */
 
     ctx.save();
 
@@ -1747,10 +1701,6 @@ function drawArena() {
     ctx.save();
 
 
-    /*
-        Outer neon glow.
-    */
-
     ctx.shadowBlur = 25;
 
     ctx.shadowColor =
@@ -1774,10 +1724,6 @@ function drawArena() {
     ctx.shadowBlur = 0;
 
 
-    /*
-        Black arena surface.
-    */
-
     ctx.fillStyle =
         "rgba(0,3,10,0.78)";
 
@@ -1789,10 +1735,6 @@ function drawArena() {
         arenaSize
     );
 
-
-    /*
-        Vertical grid.
-    */
 
     for (
         let i = 0;
@@ -1841,10 +1783,6 @@ function drawArena() {
 
     }
 
-
-    /*
-        Horizontal grid.
-    */
 
     for (
         let i = 0;
@@ -1924,10 +1862,6 @@ function drawTrail(
         "round";
 
 
-    /*
-        Outer glow.
-    */
-
     ctx.beginPath();
 
 
@@ -1981,10 +1915,6 @@ function drawTrail(
     ctx.stroke();
 
 
-    /*
-        Main trail.
-    */
-
     ctx.beginPath();
 
 
@@ -2037,10 +1967,6 @@ function drawTrail(
 
     ctx.stroke();
 
-
-    /*
-        White center.
-    */
 
     ctx.globalAlpha =
         0.9;
@@ -2142,10 +2068,6 @@ function drawCycle(cycle) {
     ctx.rotate(angle);
 
 
-    /*
-        Neon outer body.
-    */
-
     ctx.shadowBlur =
         24;
 
@@ -2169,10 +2091,6 @@ function drawCycle(cycle) {
     ctx.fill();
 
 
-    /*
-        Black center.
-    */
-
     ctx.shadowBlur = 0;
 
     ctx.fillStyle =
@@ -2191,10 +2109,6 @@ function drawCycle(cycle) {
 
     ctx.fill();
 
-
-    /*
-        Bright center line.
-    */
 
     ctx.fillStyle =
         cycle.core;
@@ -2218,10 +2132,6 @@ function drawCycle(cycle) {
 
     ctx.fill();
 
-
-    /*
-        Front light.
-    */
 
     ctx.fillStyle =
         cycle.color;
@@ -2308,10 +2218,6 @@ function drawHUD() {
     ctx.save();
 
 
-    /*
-        Stopwatch box.
-    */
-
     const timerText =
         formatTime(
             survivalTime
@@ -2334,10 +2240,6 @@ function drawHUD() {
     ctx.textBaseline =
         "middle";
 
-
-    /*
-        Stopwatch background.
-    */
 
     const boxWidth = 112;
     const boxHeight = 34;
@@ -2368,10 +2270,6 @@ function drawHUD() {
     ctx.stroke();
 
 
-    /*
-        Stopwatch text.
-    */
-
     ctx.fillStyle =
         "#8de4ff";
 
@@ -2389,10 +2287,6 @@ function drawHUD() {
         boxHeight / 2
     );
 
-
-    /*
-        Grid label.
-    */
 
     ctx.shadowBlur = 0;
 
@@ -2412,10 +2306,6 @@ function drawHUD() {
         arenaTop - 12
     );
 
-
-    /*
-        Blue laser indicator.
-    */
 
     if (
         laserActive
@@ -2443,13 +2333,6 @@ function drawHUD() {
 
     }
 
-
-    /*
-        Red trail status.
-
-        This is deliberately subtle so it
-        doesn't clutter the game.
-    */
 
     ctx.textAlign =
         "left";
@@ -2542,13 +2425,6 @@ function draw() {
     drawArena();
 
 
-    /*
-        RED TRAIL
-
-        It is only drawn when the red
-        cycle's random trail is active.
-    */
-
     if (
         enemyTrailActive
     ) {
@@ -2560,10 +2436,6 @@ function draw() {
 
     }
 
-
-    /*
-        BLUE PLAYER TRAIL
-    */
 
     if (
         player.trailEnabled
@@ -2577,18 +2449,10 @@ function draw() {
     }
 
 
-    /*
-        Cycles.
-    */
-
     drawCycle(enemy);
 
     drawCycle(player);
 
-
-    /*
-        HUD / stopwatch.
-    */
 
     drawHUD();
 
