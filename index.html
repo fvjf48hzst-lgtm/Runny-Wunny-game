@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport"
       content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+
 <title>Neon Light Cycle</title>
 
 <style>
@@ -34,13 +35,18 @@
         width: 100vw;
         height: 100vh;
         overflow: hidden;
+
         background:
-            radial-gradient(circle at 50% 45%,
+            radial-gradient(
+                circle at 50% 45%,
                 rgba(0, 120, 255, 0.16),
-                transparent 48%),
-            radial-gradient(circle at 20% 80%,
+                transparent 48%
+            ),
+            radial-gradient(
+                circle at 20% 80%,
                 rgba(0, 80, 255, 0.12),
-                transparent 40%),
+                transparent 40%
+            ),
             #020611;
     }
 
@@ -52,11 +58,15 @@
         display: block;
     }
 
+    /* =====================================================
+       PAUSE BUTTON
+       ===================================================== */
+
     #pauseButton {
         position: absolute;
         top: 18px;
         left: 18px;
-        z-index: 10;
+        z-index: 100;
 
         width: 48px;
         height: 48px;
@@ -64,7 +74,7 @@
         border: 1px solid rgba(80, 190, 255, 0.8);
         border-radius: 10px;
 
-        background: rgba(0, 10, 25, 0.78);
+        background: rgba(0, 10, 25, 0.88);
         color: #75d9ff;
 
         font-size: 24px;
@@ -79,12 +89,23 @@
         justify-content: center;
 
         touch-action: manipulation;
+
+        cursor: pointer;
     }
+
+    #pauseButton:active {
+        transform: scale(0.94);
+        background: rgba(0, 35, 65, 0.95);
+    }
+
+    /* =====================================================
+       PAUSE MENU
+       ===================================================== */
 
     #pauseMenu {
         position: absolute;
         inset: 0;
-        z-index: 20;
+        z-index: 90;
 
         display: none;
         align-items: center;
@@ -92,6 +113,8 @@
 
         background: rgba(0, 3, 12, 0.72);
         backdrop-filter: blur(5px);
+
+        touch-action: auto;
     }
 
     #pausePanel {
@@ -118,14 +141,19 @@
 
     #pausePanel h1 {
         margin: 0 0 8px;
+
         color: #72d8ff;
+
         font-size: 30px;
         letter-spacing: 3px;
-        text-shadow: 0 0 12px rgba(60, 190, 255, 0.8);
+
+        text-shadow:
+            0 0 12px rgba(60, 190, 255, 0.8);
     }
 
     #pausePanel p {
         margin: 0 0 22px;
+
         color: #8da6c2;
         font-size: 14px;
     }
@@ -133,6 +161,7 @@
     .menuButton {
         width: 100%;
         min-height: 48px;
+
         margin-top: 10px;
 
         border: 1px solid rgba(70, 190, 255, 0.65);
@@ -145,7 +174,12 @@
         font-weight: bold;
         letter-spacing: 1px;
 
-        box-shadow: 0 0 12px rgba(0, 120, 255, 0.18);
+        box-shadow:
+            0 0 12px rgba(0, 120, 255, 0.18);
+
+        cursor: pointer;
+
+        touch-action: manipulation;
     }
 
     .menuButton:active {
@@ -153,13 +187,19 @@
         background: rgba(0, 65, 115, 0.8);
     }
 
+    /* =====================================================
+       MESSAGE
+       ===================================================== */
+
     #message {
         position: absolute;
+
         left: 50%;
         top: 50%;
+
         transform: translate(-50%, -50%);
 
-        z-index: 8;
+        z-index: 80;
 
         color: white;
         text-align: center;
@@ -167,18 +207,23 @@
         pointer-events: none;
 
         opacity: 0;
+
         transition: opacity 0.2s;
     }
 
     #message h2 {
         margin: 0;
+
         font-size: 34px;
         letter-spacing: 4px;
-        text-shadow: 0 0 15px #48caff;
+
+        text-shadow:
+            0 0 15px #48caff;
     }
 
     #message p {
         margin-top: 8px;
+
         color: #9db8d0;
         font-size: 14px;
     }
@@ -188,36 +233,62 @@
 <body>
 
 <div id="game">
+
     <canvas id="canvas"></canvas>
 
-    <button id="pauseButton" aria-label="Pause">Ⅱ</button>
+    <!-- PAUSE -->
+    <button
+        id="pauseButton"
+        type="button"
+        aria-label="Pause game"
+    >Ⅱ</button>
 
+
+    <!-- MESSAGE -->
     <div id="message">
         <h2 id="messageTitle"></h2>
         <p id="messageText"></p>
     </div>
 
+
+    <!-- PAUSE MENU -->
     <div id="pauseMenu">
+
         <div id="pausePanel">
+
             <h1>PAUSED</h1>
+
             <p>Light Cycle Arena</p>
 
-            <button class="menuButton" id="resumeButton">
+            <button
+                class="menuButton"
+                id="resumeButton"
+                type="button"
+            >
                 RESUME
             </button>
 
-            <button class="menuButton" id="restartButton">
+            <button
+                class="menuButton"
+                id="restartButton"
+                type="button"
+            >
                 RESTART
             </button>
+
         </div>
+
     </div>
+
 </div>
+
 
 <script>
 "use strict";
 
+
 /* =========================================================
-   LIGHT CYCLE
+   ELEMENTS
    ========================================================= */
 
 const canvas = document.getElementById("canvas");
@@ -225,18 +296,30 @@ const ctx = canvas.getContext("2d");
 
 const game = document.getElementById("game");
 
-const pauseButton = document.getElementById("pauseButton");
-const pauseMenu = document.getElementById("pauseMenu");
-const resumeButton = document.getElementById("resumeButton");
-const restartButton = document.getElementById("restartButton");
+const pauseButton =
+    document.getElementById("pauseButton");
 
-const message = document.getElementById("message");
-const messageTitle = document.getElementById("messageTitle");
-const messageText = document.getElementById("messageText");
+const pauseMenu =
+    document.getElementById("pauseMenu");
+
+const resumeButton =
+    document.getElementById("resumeButton");
+
+const restartButton =
+    document.getElementById("restartButton");
+
+const message =
+    document.getElementById("message");
+
+const messageTitle =
+    document.getElementById("messageTitle");
+
+const messageText =
+    document.getElementById("messageText");
 
 
 /* =========================================================
-   ARENA SETTINGS
+   ARENA
    ========================================================= */
 
 const GRID_SIZE = 25;
@@ -264,20 +347,35 @@ const PLAYER_CORE = "#e7faff";
 const ENEMY_COLOR = "#ff304f";
 const ENEMY_CORE = "#fff0f3";
 
-const GRID_COLOR = "#075ea8";
-
 const TRAIL_WIDTH = 5;
 
 const DIRECTIONS = {
-    UP:    { x: 0,  y: -1 },
-    DOWN:  { x: 0,  y: 1 },
-    LEFT:  { x: -1, y: 0 },
-    RIGHT: { x: 1,  y: 0 }
+
+    UP: {
+        x: 0,
+        y: -1
+    },
+
+    DOWN: {
+        x: 0,
+        y: 1
+    },
+
+    LEFT: {
+        x: -1,
+        y: 0
+    },
+
+    RIGHT: {
+        x: 1,
+        y: 0
+    }
+
 };
 
 
 /* =========================================================
-   STATE
+   GAME STATE
    ========================================================= */
 
 let paused = false;
@@ -291,15 +389,52 @@ let enemyTrail = [];
 
 let laserActive = false;
 
+
+/* =========================================================
+   STOPWATCH
+   ========================================================= */
+
+let survivalTime = 0;
+
+
+/* =========================================================
+   RED TRAIL RANDOMIZER
+   ========================================================= */
+
+let enemyTrailActive = false;
+
+let enemyTrailTimer = 0;
+
+let enemyTrailNextChange = 0;
+
+
+/*
+    These values make the red trail randomly
+    turn on and off.
+
+    It can stay off for a random amount of time,
+    then turn on for a random amount of time.
+*/
+
+const ENEMY_TRAIL_MIN_TIME = 0.7;
+const ENEMY_TRAIL_MAX_TIME = 2.8;
+
+
+/* =========================================================
+   TIMING
+   ========================================================= */
+
 let lastTime = 0;
 
 
 /* =========================================================
-   PLAYER
+   CREATE PLAYER
    ========================================================= */
 
 function createPlayer() {
+
     return {
+
         x: 3,
         y: 12,
 
@@ -311,19 +446,21 @@ function createPlayer() {
 
         speed: PLAYER_SPEED,
 
-        trailEnabled: false,
+        trailEnabled: false
 
-        distance: 0
     };
+
 }
 
 
 /* =========================================================
-   ENEMY
+   CREATE ENEMY
    ========================================================= */
 
 function createEnemy() {
+
     return {
+
         x: 21,
         y: 12,
 
@@ -333,10 +470,28 @@ function createEnemy() {
         color: ENEMY_COLOR,
         core: ENEMY_CORE,
 
-        speed: ENEMY_SPEED,
+        speed: ENEMY_SPEED
 
-        distance: 0
     };
+
+}
+
+
+/* =========================================================
+   RANDOM TRAIL TIMER
+   ========================================================= */
+
+function randomEnemyTrailTime() {
+
+    return (
+        ENEMY_TRAIL_MIN_TIME +
+        Math.random() *
+        (
+            ENEMY_TRAIL_MAX_TIME -
+            ENEMY_TRAIL_MIN_TIME
+        )
+    );
+
 }
 
 
@@ -353,15 +508,37 @@ function resetGame() {
     enemyTrail = [];
 
     laserActive = false;
+    player.trailEnabled = false;
+
+
+    /*
+        Start the red cycle with its trail ON.
+    */
+
+    enemyTrailActive = true;
+
+    enemyTrailTimer = 0;
+
+    enemyTrailNextChange =
+        randomEnemyTrailTime();
+
+
+    /*
+        Reset stopwatch.
+    */
+
+    survivalTime = 0;
+
 
     paused = false;
     gameOver = false;
 
-    hideMessage();
-
     pauseMenu.style.display = "none";
 
+    hideMessage();
+
     lastTime = performance.now();
+
 }
 
 
@@ -371,7 +548,11 @@ function resetGame() {
 
 function resize() {
 
-    const dpr = Math.min(window.devicePixelRatio || 1, 2);
+    const dpr =
+        Math.min(
+            window.devicePixelRatio || 1,
+            2
+        );
 
     width = window.innerWidth;
     height = window.innerHeight;
@@ -379,68 +560,119 @@ function resize() {
     canvas.width = width * dpr;
     canvas.height = height * dpr;
 
-    canvas.style.width = width + "px";
-    canvas.style.height = height + "px";
+    canvas.style.width =
+        width + "px";
 
-    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    canvas.style.height =
+        height + "px";
 
-    arenaSize = Math.min(width, height) * 0.82;
-
-    arenaSize = Math.max(
-        260,
-        Math.min(arenaSize, Math.min(width, height) - 50)
+    ctx.setTransform(
+        dpr,
+        0,
+        0,
+        dpr,
+        0,
+        0
     );
 
-    arenaLeft = (width - arenaSize) / 2;
-    arenaTop = (height - arenaSize) / 2;
 
-    cellSize = arenaSize / GRID_SIZE;
+    arenaSize =
+        Math.min(width, height) * 0.82;
+
+
+    arenaSize =
+        Math.max(
+            260,
+            Math.min(
+                arenaSize,
+                Math.min(width, height) - 50
+            )
+        );
+
+
+    arenaLeft =
+        (width - arenaSize) / 2;
+
+    arenaTop =
+        (height - arenaSize) / 2;
+
+    cellSize =
+        arenaSize / GRID_SIZE;
+
 }
-
-window.addEventListener("resize", resize);
 
 
 /* =========================================================
-   GRID POSITION
+   GRID TO PIXEL
    ========================================================= */
 
 function gridToPixel(x, y) {
 
     return {
-        x: arenaLeft + x * cellSize,
-        y: arenaTop + y * cellSize
+
+        x:
+            arenaLeft +
+            x * cellSize,
+
+        y:
+            arenaTop +
+            y * cellSize
+
     };
+
 }
 
 
 /* =========================================================
-   VALID DIRECTION
+   OPPOSITE DIRECTION
    ========================================================= */
 
 function isOpposite(a, b) {
 
     return (
-        (a === "UP" && b === "DOWN") ||
-        (a === "DOWN" && b === "UP") ||
-        (a === "LEFT" && b === "RIGHT") ||
-        (a === "RIGHT" && b === "LEFT")
+
+        (a === "UP" &&
+         b === "DOWN") ||
+
+        (a === "DOWN" &&
+         b === "UP") ||
+
+        (a === "LEFT" &&
+         b === "RIGHT") ||
+
+        (a === "RIGHT" &&
+         b === "LEFT")
+
     );
+
 }
 
 
 /* =========================================================
-   CHANGE DIRECTION
+   PLAYER DIRECTION
    ========================================================= */
 
 function changePlayerDirection(newDirection) {
 
-    if (paused || gameOver) return;
+    if (paused || gameOver) {
+        return;
+    }
 
-    if (isOpposite(player.dir, newDirection)) {
+    /*
+        Never allow a direct 180° turn.
+    */
+
+    if (
+        isOpposite(
+            player.dir,
+            newDirection
+        )
+    ) {
         return;
     }
 
     player.nextDir = newDirection;
+
 }
 
 
@@ -455,121 +687,217 @@ let touchStartTime = 0;
 const SWIPE_DISTANCE = 25;
 const SWIPE_TIME = 700;
 
-game.addEventListener("pointerdown", function(event) {
 
-    if (
-        event.target === pauseButton ||
-        event.target.closest("#pauseMenu")
-    ) {
-        return;
-    }
+game.addEventListener(
+    "pointerdown",
+    function(event) {
 
-    touchStartX = event.clientX;
-    touchStartY = event.clientY;
-    touchStartTime = performance.now();
-});
+        /*
+            Ignore the pause button and pause menu.
+        */
 
-
-game.addEventListener("pointerup", function(event) {
-
-    if (
-        event.target === pauseButton ||
-        event.target.closest("#pauseMenu")
-    ) {
-        return;
-    }
-
-    if (paused || gameOver) return;
-
-    const dx = event.clientX - touchStartX;
-    const dy = event.clientY - touchStartY;
-
-    const distance = Math.sqrt(dx * dx + dy * dy);
-    const elapsed = performance.now() - touchStartTime;
-
-    if (distance < SWIPE_DISTANCE) return;
-    if (elapsed > SWIPE_TIME) return;
-
-    if (Math.abs(dx) > Math.abs(dy)) {
-
-        if (dx > 0) {
-            changePlayerDirection("RIGHT");
-        } else {
-            changePlayerDirection("LEFT");
+        if (
+            event.target === pauseButton ||
+            event.target.closest("#pauseMenu")
+        ) {
+            return;
         }
 
-    } else {
+        touchStartX = event.clientX;
+        touchStartY = event.clientY;
 
-        if (dy > 0) {
-            changePlayerDirection("DOWN");
-        } else {
-            changePlayerDirection("UP");
-        }
+        touchStartTime =
+            performance.now();
+
     }
-});
+);
+
+
+game.addEventListener(
+    "pointerup",
+    function(event) {
+
+        if (
+            event.target === pauseButton ||
+            event.target.closest("#pauseMenu")
+        ) {
+            return;
+        }
+
+        if (paused || gameOver) {
+            return;
+        }
+
+        const dx =
+            event.clientX -
+            touchStartX;
+
+        const dy =
+            event.clientY -
+            touchStartY;
+
+        const distance =
+            Math.sqrt(
+                dx * dx +
+                dy * dy
+            );
+
+        const elapsed =
+            performance.now() -
+            touchStartTime;
+
+
+        if (
+            distance < SWIPE_DISTANCE
+        ) {
+            return;
+        }
+
+        if (
+            elapsed > SWIPE_TIME
+        ) {
+            return;
+        }
+
+
+        /*
+            Horizontal swipe.
+        */
+
+        if (
+            Math.abs(dx) >
+            Math.abs(dy)
+        ) {
+
+            if (dx > 0) {
+
+                changePlayerDirection(
+                    "RIGHT"
+                );
+
+            } else {
+
+                changePlayerDirection(
+                    "LEFT"
+                );
+
+            }
+
+        }
+
+        /*
+            Vertical swipe.
+        */
+
+        else {
+
+            if (dy > 0) {
+
+                changePlayerDirection(
+                    "DOWN"
+                );
+
+            } else {
+
+                changePlayerDirection(
+                    "UP"
+                );
+
+            }
+
+        }
+
+    }
+);
 
 
 /* =========================================================
-   DOUBLE TAP = LASER
+   DOUBLE TAP = BLUE TRAIL
    ========================================================= */
 
 let lastTap = 0;
 
-game.addEventListener("pointerup", function(event) {
 
-    if (
-        event.target === pauseButton ||
-        event.target.closest("#pauseMenu")
-    ) {
-        return;
+game.addEventListener(
+    "pointerup",
+    function(event) {
+
+        if (
+            event.target === pauseButton ||
+            event.target.closest("#pauseMenu")
+        ) {
+            return;
+        }
+
+        if (paused || gameOver) {
+            return;
+        }
+
+        const now =
+            performance.now();
+
+
+        if (
+            now - lastTap < 320
+        ) {
+
+            laserActive =
+                !laserActive;
+
+            player.trailEnabled =
+                laserActive;
+
+        }
+
+
+        lastTap = now;
+
     }
-
-    if (paused || gameOver) return;
-
-    const now = performance.now();
-
-    if (now - lastTap < 320) {
-
-        laserActive = !laserActive;
-        player.trailEnabled = laserActive;
-
-    }
-
-    lastTap = now;
-});
+);
 
 
 /* =========================================================
-   KEYBOARD SUPPORT
+   PAUSE BUTTON
    ========================================================= */
 
-window.addEventListener("keydown", function(event) {
+/*
+    IMPORTANT:
+    Stop the event from reaching the game swipe handlers.
+*/
 
-    if (event.key === "ArrowUp" || event.key.toLowerCase() === "w") {
-        changePlayerDirection("UP");
+pauseButton.addEventListener(
+    "pointerdown",
+    function(event) {
+
+        event.preventDefault();
+        event.stopPropagation();
+
     }
+);
 
-    if (event.key === "ArrowDown" || event.key.toLowerCase() === "s") {
-        changePlayerDirection("DOWN");
-    }
 
-    if (event.key === "ArrowLeft" || event.key.toLowerCase() === "a") {
-        changePlayerDirection("LEFT");
-    }
+pauseButton.addEventListener(
+    "pointerup",
+    function(event) {
 
-    if (event.key === "ArrowRight" || event.key.toLowerCase() === "d") {
-        changePlayerDirection("RIGHT");
-    }
+        event.preventDefault();
+        event.stopPropagation();
 
-    if (event.key === " " || event.key.toLowerCase() === "p") {
         togglePause();
-    }
 
-    if (event.key === "l") {
-        laserActive = !laserActive;
-        player.trailEnabled = laserActive;
     }
-});
+);
+
+
+pauseButton.addEventListener(
+    "click",
+    function(event) {
+
+        event.preventDefault();
+        event.stopPropagation();
+
+    }
+);
 
 
 /* =========================================================
@@ -578,58 +906,181 @@ window.addEventListener("keydown", function(event) {
 
 function togglePause() {
 
-    if (gameOver) return;
+    if (gameOver) {
+        return;
+    }
 
     paused = !paused;
 
-    pauseMenu.style.display = paused ? "flex" : "none";
+    if (paused) {
 
-    if (!paused) {
-        lastTime = performance.now();
+        pauseMenu.style.display =
+            "flex";
+
+    } else {
+
+        pauseMenu.style.display =
+            "none";
+
+        /*
+            Prevent the stopwatch from
+            jumping forward after unpausing.
+        */
+
+        lastTime =
+            performance.now();
+
     }
+
 }
 
 
-pauseButton.addEventListener("click", function(event) {
+/* =========================================================
+   RESUME
+   ========================================================= */
 
-    event.stopPropagation();
-    togglePause();
+resumeButton.addEventListener(
+    "click",
+    function(event) {
 
-});
+        event.preventDefault();
+        event.stopPropagation();
+
+        paused = false;
+
+        pauseMenu.style.display =
+            "none";
+
+        lastTime =
+            performance.now();
+
+    }
+);
 
 
-resumeButton.addEventListener("click", function() {
+/* =========================================================
+   RESTART
+   ========================================================= */
 
-    paused = false;
+restartButton.addEventListener(
+    "click",
+    function(event) {
 
-    pauseMenu.style.display = "none";
+        event.preventDefault();
+        event.stopPropagation();
 
-    lastTime = performance.now();
+        resetGame();
 
-});
+    }
+);
 
 
-restartButton.addEventListener("click", function() {
+/* =========================================================
+   KEYBOARD
+   ========================================================= */
 
-    resetGame();
+window.addEventListener(
+    "keydown",
+    function(event) {
 
-});
+        if (
+            event.key === "ArrowUp" ||
+            event.key.toLowerCase() === "w"
+        ) {
+
+            changePlayerDirection("UP");
+
+        }
+
+
+        if (
+            event.key === "ArrowDown" ||
+            event.key.toLowerCase() === "s"
+        ) {
+
+            changePlayerDirection("DOWN");
+
+        }
+
+
+        if (
+            event.key === "ArrowLeft" ||
+            event.key.toLowerCase() === "a"
+        ) {
+
+            changePlayerDirection("LEFT");
+
+        }
+
+
+        if (
+            event.key === "ArrowRight" ||
+            event.key.toLowerCase() === "d"
+        ) {
+
+            changePlayerDirection("RIGHT");
+
+        }
+
+
+        if (
+            event.key === " " ||
+            event.key.toLowerCase() === "p"
+        ) {
+
+            togglePause();
+
+        }
+
+
+        if (
+            event.key.toLowerCase() === "l"
+        ) {
+
+            laserActive =
+                !laserActive;
+
+            player.trailEnabled =
+                laserActive;
+
+        }
+
+    }
+);
 
 
 /* =========================================================
    MOVE CYCLE
    ========================================================= */
 
-function moveCycle(cycle, trail, dt) {
+function moveCycle(
+    cycle,
+    trail,
+    dt,
+    shouldLeaveTrail
+) {
 
-    cycle.dir = cycle.nextDir;
+    cycle.dir =
+        cycle.nextDir;
 
-    const direction = DIRECTIONS[cycle.dir];
+    const direction =
+        DIRECTIONS[cycle.dir];
 
-    cycle.x += direction.x * cycle.speed * dt;
-    cycle.y += direction.y * cycle.speed * dt;
 
-    cycle.distance += cycle.speed * dt;
+    cycle.x +=
+        direction.x *
+        cycle.speed *
+        dt;
+
+    cycle.y +=
+        direction.y *
+        cycle.speed *
+        dt;
+
+
+    /*
+        Arena collision.
+    */
 
     if (
         cycle.x < 0 ||
@@ -637,35 +1088,72 @@ function moveCycle(cycle, trail, dt) {
         cycle.y < 0 ||
         cycle.y > GRID_SIZE
     ) {
-        gameOver = true;
 
-        showMessage(
-            "CRASHED",
-            "You hit the arena wall"
-        );
+        if (cycle === player) {
+
+            gameOver = true;
+
+            showMessage(
+                "CRASHED",
+                "You hit the arena wall"
+            );
+
+        } else {
+
+            gameOver = true;
+
+            showMessage(
+                "VICTORY",
+                "The red cycle crashed"
+            );
+
+        }
 
         return;
     }
 
-    if (
-        trail.length === 0 ||
-        distanceBetween(
-            cycle.x,
-            cycle.y,
-            trail[trail.length - 1].x,
-            trail[trail.length - 1].y
-        ) > 0.08
-    ) {
 
-        trail.push({
-            x: cycle.x,
-            y: cycle.y
-        });
+    /*
+        Only record a trail if the cycle's
+        light trail is currently ON.
+    */
+
+    if (shouldLeaveTrail) {
+
+        if (
+            trail.length === 0 ||
+            distanceBetween(
+                cycle.x,
+                cycle.y,
+                trail[
+                    trail.length - 1
+                ].x,
+                trail[
+                    trail.length - 1
+                ].y
+            ) > 0.08
+        ) {
+
+            trail.push({
+                x: cycle.x,
+                y: cycle.y
+            });
+
+        }
+
     }
+
+
+    /*
+        Keep memory under control.
+    */
 
     if (trail.length > 2500) {
+
         trail.shift();
+
     }
+
 }
 
 
@@ -673,12 +1161,24 @@ function moveCycle(cycle, trail, dt) {
    DISTANCE
    ========================================================= */
 
-function distanceBetween(x1, y1, x2, y2) {
+function distanceBetween(
+    x1,
+    y1,
+    x2,
+    y2
+) {
 
-    const dx = x1 - x2;
-    const dy = y1 - y2;
+    const dx =
+        x1 - x2;
 
-    return Math.sqrt(dx * dx + dy * dy);
+    const dy =
+        y1 - y2;
+
+    return Math.sqrt(
+        dx * dx +
+        dy * dy
+    );
+
 }
 
 
@@ -686,23 +1186,44 @@ function distanceBetween(x1, y1, x2, y2) {
    TRAIL COLLISION
    ========================================================= */
 
-function checkTrailCollision(cycle, trail) {
+function checkTrailCollision(
+    cycle,
+    trail
+) {
 
-    const checkDistance = 0.35;
+    const checkDistance =
+        0.35;
 
-    for (let i = 0; i < trail.length - 5; i++) {
 
-        const point = trail[i];
+    for (
+        let i = 0;
+        i < trail.length - 5;
+        i++
+    ) {
+
+        const point =
+            trail[i];
+
 
         if (
-            Math.abs(cycle.x - point.x) < checkDistance &&
-            Math.abs(cycle.y - point.y) < checkDistance
+            Math.abs(
+                cycle.x - point.x
+            ) < checkDistance &&
+
+            Math.abs(
+                cycle.y - point.y
+            ) < checkDistance
         ) {
+
             return true;
+
         }
+
     }
 
+
     return false;
+
 }
 
 
@@ -712,18 +1233,15 @@ function checkTrailCollision(cycle, trail) {
 
 function checkCycleCollision() {
 
-    if (
+    return (
         distanceBetween(
             player.x,
             player.y,
             enemy.x,
             enemy.y
         ) < 0.75
-    ) {
-        return true;
-    }
+    );
 
-    return false;
 }
 
 
@@ -740,76 +1258,145 @@ function updateEnemyAI() {
         "RIGHT"
     ];
 
-    const safeDirections = possibleDirections.filter(dir => {
 
-        if (isOpposite(enemy.dir, dir)) {
-            return false;
-        }
+    const safeDirections =
+        possibleDirections.filter(
+            function(dir) {
 
-        const direction = DIRECTIONS[dir];
+                if (
+                    isOpposite(
+                        enemy.dir,
+                        dir
+                    )
+                ) {
+                    return false;
+                }
 
-        const testX = enemy.x + direction.x * 1.5;
-        const testY = enemy.y + direction.y * 1.5;
 
-        if (
-            testX < 0.5 ||
-            testX > GRID_SIZE - 0.5 ||
-            testY < 0.5 ||
-            testY > GRID_SIZE - 0.5
-        ) {
-            return false;
-        }
+                const direction =
+                    DIRECTIONS[dir];
 
-        if (
-            checkPointAgainstTrail(
-                testX,
-                testY,
-                enemyTrail
-            )
-        ) {
-            return false;
-        }
 
-        if (
-            checkPointAgainstTrail(
-                testX,
-                testY,
-                playerTrail
-            )
-        ) {
-            return false;
-        }
+                const testX =
+                    enemy.x +
+                    direction.x *
+                    1.5;
 
-        return true;
-    });
+                const testY =
+                    enemy.y +
+                    direction.y *
+                    1.5;
 
-    if (safeDirections.length === 0) {
+
+                if (
+                    testX < 0.5 ||
+                    testX >
+                    GRID_SIZE - 0.5 ||
+
+                    testY < 0.5 ||
+                    testY >
+                    GRID_SIZE - 0.5
+                ) {
+                    return false;
+                }
+
+
+                /*
+                    Avoid the red trail.
+                */
+
+                if (
+                    checkPointAgainstTrail(
+                        testX,
+                        testY,
+                        enemyTrail
+                    )
+                ) {
+                    return false;
+                }
+
+
+                /*
+                    Avoid the blue trail.
+                */
+
+                if (
+                    checkPointAgainstTrail(
+                        testX,
+                        testY,
+                        playerTrail
+                    )
+                ) {
+                    return false;
+                }
+
+
+                return true;
+
+            }
+        );
+
+
+    if (
+        safeDirections.length === 0
+    ) {
         return;
     }
 
-    const currentDirection = enemy.dir;
 
-    if (safeDirections.includes(currentDirection)) {
+    const currentDirection =
+        enemy.dir;
 
-        if (Math.random() < 0.025) {
 
-            const turns = safeDirections.filter(
-                d => d !== currentDirection
-            );
+    if (
+        safeDirections.includes(
+            currentDirection
+        )
+    ) {
 
-            if (turns.length > 0) {
+        if (
+            Math.random() < 0.025
+        ) {
+
+            const turns =
+                safeDirections.filter(
+                    function(d) {
+                        return (
+                            d !==
+                            currentDirection
+                        );
+                    }
+                );
+
+
+            if (
+                turns.length > 0
+            ) {
+
                 enemy.nextDir =
-                    turns[Math.floor(Math.random() * turns.length)];
+                    turns[
+                        Math.floor(
+                            Math.random() *
+                            turns.length
+                        )
+                    ];
+
             }
+
         }
 
     } else {
 
         enemy.nextDir =
             safeDirections[
-                Math.floor(Math.random() * safeDirections.length)
+                Math.floor(
+                    Math.random() *
+                    safeDirections.length
+                )
             ];
+
     }
+
 }
 
 
@@ -817,23 +1404,73 @@ function updateEnemyAI() {
    TRAIL POINT CHECK
    ========================================================= */
 
-function checkPointAgainstTrail(x, y, trail) {
+function checkPointAgainstTrail(
+    x,
+    y,
+    trail
+) {
 
-    const checkDistance = 0.42;
+    const checkDistance =
+        0.42;
 
-    for (let i = 0; i < trail.length; i++) {
 
-        const point = trail[i];
+    for (
+        let i = 0;
+        i < trail.length;
+        i++
+    ) {
+
+        const point =
+            trail[i];
+
 
         if (
-            Math.abs(x - point.x) < checkDistance &&
-            Math.abs(y - point.y) < checkDistance
+            Math.abs(
+                x - point.x
+            ) < checkDistance &&
+
+            Math.abs(
+                y - point.y
+            ) < checkDistance
         ) {
+
             return true;
+
         }
+
     }
 
+
     return false;
+
+}
+
+
+/* =========================================================
+   RANDOM RED TRAIL
+   ========================================================= */
+
+function updateEnemyTrail(dt) {
+
+    enemyTrailTimer += dt;
+
+
+    if (
+        enemyTrailTimer >=
+        enemyTrailNextChange
+    ) {
+
+        enemyTrailTimer = 0;
+
+        enemyTrailActive =
+            !enemyTrailActive;
+
+
+        enemyTrailNextChange =
+            randomEnemyTrailTime();
+
+    }
+
 }
 
 
@@ -843,19 +1480,105 @@ function checkPointAgainstTrail(x, y, trail) {
 
 function update(dt) {
 
-    if (paused || gameOver) return;
+    if (
+        paused ||
+        gameOver
+    ) {
+        return;
+    }
+
+
+    /*
+        Stopwatch.
+    */
+
+    survivalTime += dt;
+
+
+    /*
+        Random red trail.
+    */
+
+    updateEnemyTrail(dt);
+
+
+    /*
+        Enemy AI.
+    */
 
     updateEnemyAI();
 
-    moveCycle(player, playerTrail, dt);
-    moveCycle(enemy, enemyTrail, dt);
 
-    if (gameOver) return;
+    /*
+        Player movement.
+
+        The player's trail only gets recorded
+        when double-tap laser is active.
+    */
+
+    moveCycle(
+        player,
+        playerTrail,
+        dt,
+        player.trailEnabled
+    );
+
+
+    /*
+        Enemy movement.
+
+        The red trail is controlled randomly.
+    */
+
+    moveCycle(
+        enemy,
+        enemyTrail,
+        dt,
+        enemyTrailActive
+    );
+
+
+    if (gameOver) {
+        return;
+    }
+
+
+    /*
+        Blue player trail hits red cycle.
+    */
 
     if (
         player.trailEnabled &&
-        checkTrailCollision(player, enemyTrail)
+        checkTrailCollision(
+            enemy,
+            playerTrail
+        )
     ) {
+
+        gameOver = true;
+
+        showMessage(
+            "VICTORY",
+            "The red cycle hit your blue trail"
+        );
+
+        return;
+
+    }
+
+
+    /*
+        Red trail hits player.
+    */
+
+    if (
+        enemyTrailActive &&
+        checkTrailCollision(
+            player,
+            enemyTrail
+        )
+    ) {
+
         gameOver = true;
 
         showMessage(
@@ -864,22 +1587,17 @@ function update(dt) {
         );
 
         return;
+
     }
+
+
+    /*
+        Cycle-to-cycle collision.
+    */
 
     if (
-        checkTrailCollision(enemy, playerTrail)
+        checkCycleCollision()
     ) {
-        gameOver = true;
-
-        showMessage(
-            "VICTORY",
-            "The red cycle crashed"
-        );
-
-        return;
-    }
-
-    if (checkCycleCollision()) {
 
         gameOver = true;
 
@@ -887,57 +1605,103 @@ function update(dt) {
             "CRASH",
             "The cycles collided"
         );
+
     }
+
 }
 
 
 /* =========================================================
-   DRAW BACKGROUND
+   BACKGROUND
    ========================================================= */
 
 function drawBackground() {
 
-    const gradient = ctx.createRadialGradient(
-        width / 2,
-        height / 2,
-        20,
-        width / 2,
-        height / 2,
-        Math.max(width, height) * 0.7
+    const gradient =
+        ctx.createRadialGradient(
+            width / 2,
+            height / 2,
+            20,
+            width / 2,
+            height / 2,
+            Math.max(
+                width,
+                height
+            ) * 0.7
+        );
+
+
+    gradient.addColorStop(
+        0,
+        "#041d3a"
     );
 
-    gradient.addColorStop(0, "#041d3a");
-    gradient.addColorStop(0.5, "#020d24");
-    gradient.addColorStop(1, "#01030b");
+    gradient.addColorStop(
+        0.5,
+        "#020d24"
+    );
 
-    ctx.fillStyle = gradient;
-    ctx.fillRect(0, 0, width, height);
+    gradient.addColorStop(
+        1,
+        "#01030b"
+    );
 
 
-    /* blue neon atmosphere */
+    ctx.fillStyle =
+        gradient;
+
+    ctx.fillRect(
+        0,
+        0,
+        width,
+        height
+    );
+
+
+    /*
+        Blue neon atmosphere.
+    */
 
     ctx.save();
 
     ctx.globalAlpha = 0.18;
 
-    for (let i = 0; i < 12; i++) {
+
+    for (
+        let i = 0;
+        i < 12;
+        i++
+    ) {
 
         const x =
-            (i * 173 + performance.now() * 0.012) % width;
+            (
+                i * 173 +
+                performance.now() *
+                0.012
+            ) % width;
+
 
         const y =
-            (i * 97) % height;
+            (
+                i * 97
+            ) % height;
 
-        const radius = 80 + (i % 4) * 35;
 
-        const glow = ctx.createRadialGradient(
-            x,
-            y,
-            0,
-            x,
-            y,
-            radius
-        );
+        const radius =
+            80 +
+            (i % 4) * 35;
+
+
+        const glow =
+            ctx.createRadialGradient(
+                x,
+                y,
+                0,
+                x,
+                y,
+                radius
+            );
+
 
         glow.addColorStop(
             0,
@@ -949,32 +1713,55 @@ function drawBackground() {
             "rgba(0,50,255,0)"
         );
 
-        ctx.fillStyle = glow;
+
+        ctx.fillStyle =
+            glow;
+
 
         ctx.beginPath();
-        ctx.arc(x, y, radius, 0, Math.PI * 2);
+
+        ctx.arc(
+            x,
+            y,
+            radius,
+            0,
+            Math.PI * 2
+        );
+
         ctx.fill();
+
     }
 
+
     ctx.restore();
+
 }
 
 
 /* =========================================================
-   DRAW ARENA
+   ARENA
    ========================================================= */
 
 function drawArena() {
 
     ctx.save();
 
-    /* outer glow */
+
+    /*
+        Outer neon glow.
+    */
 
     ctx.shadowBlur = 25;
-    ctx.shadowColor = "rgba(0, 130, 255, 0.8)";
 
-    ctx.strokeStyle = "#087cff";
+    ctx.shadowColor =
+        "rgba(0,130,255,0.8)";
+
+
+    ctx.strokeStyle =
+        "#087cff";
+
     ctx.lineWidth = 3;
+
 
     ctx.strokeRect(
         arenaLeft,
@@ -983,12 +1770,17 @@ function drawArena() {
         arenaSize
     );
 
+
     ctx.shadowBlur = 0;
 
 
-    /* black arena surface */
+    /*
+        Black arena surface.
+    */
 
-    ctx.fillStyle = "rgba(0, 3, 10, 0.78)";
+    ctx.fillStyle =
+        "rgba(0,3,10,0.78)";
+
 
     ctx.fillRect(
         arenaLeft,
@@ -998,186 +1790,371 @@ function drawArena() {
     );
 
 
-    /* 25 × 25 grid */
+    /*
+        Vertical grid.
+    */
 
-    for (let i = 0; i <= GRID_SIZE; i++) {
+    for (
+        let i = 0;
+        i <= GRID_SIZE;
+        i++
+    ) {
 
         const position =
-            arenaLeft + i * cellSize;
+            arenaLeft +
+            i * cellSize;
+
 
         ctx.beginPath();
-        ctx.moveTo(position, arenaTop);
-        ctx.lineTo(position, arenaTop + arenaSize);
+
+        ctx.moveTo(
+            position,
+            arenaTop
+        );
+
+        ctx.lineTo(
+            position,
+            arenaTop +
+            arenaSize
+        );
+
 
         ctx.strokeStyle =
-            i === 0 || i === GRID_SIZE
+            i === 0 ||
+            i === GRID_SIZE
+
                 ? "rgba(0,170,255,0.7)"
+
                 : "rgba(0,100,190,0.25)";
 
+
         ctx.lineWidth =
-            i === 0 || i === GRID_SIZE
+            i === 0 ||
+            i === GRID_SIZE
+
                 ? 2
+
                 : 1;
 
+
         ctx.stroke();
+
     }
 
 
-    for (let i = 0; i <= GRID_SIZE; i++) {
+    /*
+        Horizontal grid.
+    */
+
+    for (
+        let i = 0;
+        i <= GRID_SIZE;
+        i++
+    ) {
 
         const position =
-            arenaTop + i * cellSize;
+            arenaTop +
+            i * cellSize;
+
 
         ctx.beginPath();
-        ctx.moveTo(arenaLeft, position);
-        ctx.lineTo(arenaLeft + arenaSize, position);
+
+        ctx.moveTo(
+            arenaLeft,
+            position
+        );
+
+        ctx.lineTo(
+            arenaLeft +
+            arenaSize,
+            position
+        );
+
 
         ctx.strokeStyle =
-            i === 0 || i === GRID_SIZE
+            i === 0 ||
+            i === GRID_SIZE
+
                 ? "rgba(0,170,255,0.7)"
+
                 : "rgba(0,100,190,0.25)";
 
+
         ctx.lineWidth =
-            i === 0 || i === GRID_SIZE
+            i === 0 ||
+            i === GRID_SIZE
+
                 ? 2
+
                 : 1;
 
+
         ctx.stroke();
+
     }
+
 
     ctx.restore();
+
 }
 
 
 /* =========================================================
-   DRAW TRAIL
+   TRAIL
    ========================================================= */
 
-function drawTrail(trail, color) {
+function drawTrail(
+    trail,
+    color
+) {
 
-    if (trail.length < 2) return;
+    if (
+        trail.length < 2
+    ) {
+        return;
+    }
+
 
     ctx.save();
 
-    ctx.lineJoin = "round";
-    ctx.lineCap = "round";
+    ctx.lineJoin =
+        "round";
 
-    /* outer glow */
-
-    ctx.beginPath();
-
-    for (let i = 0; i < trail.length; i++) {
-
-        const point = gridToPixel(
-            trail[i].x,
-            trail[i].y
-        );
-
-        if (i === 0) {
-            ctx.moveTo(point.x, point.y);
-        } else {
-            ctx.lineTo(point.x, point.y);
-        }
-    }
-
-    ctx.strokeStyle = color;
-    ctx.lineWidth = TRAIL_WIDTH + 10;
-
-    ctx.globalAlpha = 0.22;
-    ctx.shadowBlur = 25;
-    ctx.shadowColor = color;
-
-    ctx.stroke();
+    ctx.lineCap =
+        "round";
 
 
-    /* main trail */
+    /*
+        Outer glow.
+    */
 
     ctx.beginPath();
 
-    for (let i = 0; i < trail.length; i++) {
 
-        const point = gridToPixel(
-            trail[i].x,
-            trail[i].y
-        );
+    for (
+        let i = 0;
+        i < trail.length;
+        i++
+    ) {
+
+        const point =
+            gridToPixel(
+                trail[i].x,
+                trail[i].y
+            );
+
 
         if (i === 0) {
-            ctx.moveTo(point.x, point.y);
+
+            ctx.moveTo(
+                point.x,
+                point.y
+            );
+
         } else {
-            ctx.lineTo(point.x, point.y);
+
+            ctx.lineTo(
+                point.x,
+                point.y
+            );
+
         }
+
     }
 
-    ctx.globalAlpha = 0.9;
-    ctx.shadowBlur = 12;
-    ctx.shadowColor = color;
 
-    ctx.strokeStyle = color;
-    ctx.lineWidth = TRAIL_WIDTH;
+    ctx.strokeStyle =
+        color;
+
+    ctx.lineWidth =
+        TRAIL_WIDTH + 10;
+
+    ctx.globalAlpha =
+        0.22;
+
+    ctx.shadowBlur =
+        25;
+
+    ctx.shadowColor =
+        color;
+
+    ctx.stroke();
+
+
+    /*
+        Main trail.
+    */
+
+    ctx.beginPath();
+
+
+    for (
+        let i = 0;
+        i < trail.length;
+        i++
+    ) {
+
+        const point =
+            gridToPixel(
+                trail[i].x,
+                trail[i].y
+            );
+
+
+        if (i === 0) {
+
+            ctx.moveTo(
+                point.x,
+                point.y
+            );
+
+        } else {
+
+            ctx.lineTo(
+                point.x,
+                point.y
+            );
+
+        }
+
+    }
+
+
+    ctx.globalAlpha =
+        0.9;
+
+    ctx.shadowBlur =
+        12;
+
+    ctx.shadowColor =
+        color;
+
+    ctx.strokeStyle =
+        color;
+
+    ctx.lineWidth =
+        TRAIL_WIDTH;
 
     ctx.stroke();
 
 
-    /* white center */
+    /*
+        White center.
+    */
 
-    ctx.globalAlpha = 0.9;
-    ctx.shadowBlur = 5;
-    ctx.shadowColor = "#ffffff";
+    ctx.globalAlpha =
+        0.9;
 
-    ctx.strokeStyle = "#dff8ff";
-    ctx.lineWidth = 1.5;
+    ctx.shadowBlur =
+        5;
+
+    ctx.shadowColor =
+        "#ffffff";
+
+    ctx.strokeStyle =
+        "#dff8ff";
+
+    ctx.lineWidth =
+        1.5;
 
     ctx.stroke();
+
 
     ctx.restore();
+
 }
 
 
 /* =========================================================
-   DRAW CYCLE
+   CYCLE
    ========================================================= */
 
 function drawCycle(cycle) {
 
-    const center = gridToPixel(
-        cycle.x,
-        cycle.y
-    );
+    const center =
+        gridToPixel(
+            cycle.x,
+            cycle.y
+        );
 
-    const length = cellSize * 0.92;
-    const thickness = Math.max(7, cellSize * 0.25);
+
+    const length =
+        cellSize * 0.92;
+
+
+    const thickness =
+        Math.max(
+            7,
+            cellSize * 0.25
+        );
+
 
     let angle = 0;
 
-    if (cycle.dir === "UP") {
-        angle = -Math.PI / 2;
+
+    if (
+        cycle.dir === "UP"
+    ) {
+
+        angle =
+            -Math.PI / 2;
+
     }
 
-    if (cycle.dir === "DOWN") {
-        angle = Math.PI / 2;
+
+    if (
+        cycle.dir === "DOWN"
+    ) {
+
+        angle =
+            Math.PI / 2;
+
     }
 
-    if (cycle.dir === "LEFT") {
-        angle = Math.PI;
+
+    if (
+        cycle.dir === "LEFT"
+    ) {
+
+        angle =
+            Math.PI;
+
     }
 
-    if (cycle.dir === "RIGHT") {
+
+    if (
+        cycle.dir === "RIGHT"
+    ) {
+
         angle = 0;
+
     }
 
 
     ctx.save();
 
-    ctx.translate(center.x, center.y);
+
+    ctx.translate(
+        center.x,
+        center.y
+    );
+
     ctx.rotate(angle);
 
 
-    /* long outer body */
+    /*
+        Neon outer body.
+    */
 
-    ctx.shadowBlur = 24;
-    ctx.shadowColor = cycle.color;
+    ctx.shadowBlur =
+        24;
 
-    ctx.fillStyle = cycle.color;
+    ctx.shadowColor =
+        cycle.color;
+
+    ctx.fillStyle =
+        cycle.color;
+
 
     ctx.beginPath();
 
@@ -1192,11 +2169,15 @@ function drawCycle(cycle) {
     ctx.fill();
 
 
-    /* black center */
+    /*
+        Black center.
+    */
 
     ctx.shadowBlur = 0;
 
-    ctx.fillStyle = "#02040a";
+    ctx.fillStyle =
+        "#02040a";
+
 
     ctx.beginPath();
 
@@ -1211,12 +2192,19 @@ function drawCycle(cycle) {
     ctx.fill();
 
 
-    /* bright neon core */
+    /*
+        Bright center line.
+    */
 
-    ctx.fillStyle = cycle.core;
+    ctx.fillStyle =
+        cycle.core;
 
-    ctx.shadowBlur = 10;
-    ctx.shadowColor = cycle.color;
+    ctx.shadowBlur =
+        10;
+
+    ctx.shadowColor =
+        cycle.color;
+
 
     ctx.beginPath();
 
@@ -1231,11 +2219,16 @@ function drawCycle(cycle) {
     ctx.fill();
 
 
-    /* front light */
+    /*
+        Front light.
+    */
 
-    ctx.fillStyle = cycle.color;
+    ctx.fillStyle =
+        cycle.color;
 
-    ctx.shadowBlur = 18;
+    ctx.shadowBlur =
+        18;
+
 
     ctx.beginPath();
 
@@ -1251,41 +2244,282 @@ function drawCycle(cycle) {
 
 
     ctx.restore();
+
 }
 
 
 /* =========================================================
-   DRAW HUD
+   FORMAT STOPWATCH
+   ========================================================= */
+
+function formatTime(seconds) {
+
+    const totalMilliseconds =
+        Math.floor(
+            seconds * 1000
+        );
+
+
+    const minutes =
+        Math.floor(
+            totalMilliseconds /
+            60000
+        );
+
+
+    const remainingAfterMinutes =
+        totalMilliseconds %
+        60000;
+
+
+    const secs =
+        Math.floor(
+            remainingAfterMinutes /
+            1000
+        );
+
+
+    const milliseconds =
+        Math.floor(
+            (
+                remainingAfterMinutes %
+                1000
+            ) / 10
+        );
+
+
+    return (
+        String(minutes).padStart(2, "0") +
+        ":" +
+        String(secs).padStart(2, "0") +
+        "." +
+        String(milliseconds).padStart(2, "0")
+    );
+
+}
+
+
+/* =========================================================
+   HUD
    ========================================================= */
 
 function drawHUD() {
 
     ctx.save();
 
-    ctx.font = "bold 12px Arial";
-    ctx.textBaseline = "middle";
 
-    ctx.fillStyle = "rgba(150,220,255,0.8)";
+    /*
+        Stopwatch box.
+    */
+
+    const timerText =
+        formatTime(
+            survivalTime
+        );
+
+
+    const timerX =
+        width / 2;
+
+    const timerY =
+        25;
+
+
+    ctx.font =
+        "bold 17px Arial";
+
+    ctx.textAlign =
+        "center";
+
+    ctx.textBaseline =
+        "middle";
+
+
+    /*
+        Stopwatch background.
+    */
+
+    const boxWidth = 112;
+    const boxHeight = 34;
+
+
+    ctx.fillStyle =
+        "rgba(0,8,22,0.82)";
+
+
+    ctx.strokeStyle =
+        "rgba(70,190,255,0.65)";
+
+
+    ctx.lineWidth = 1;
+
+
+    ctx.beginPath();
+
+    ctx.roundRect(
+        timerX - boxWidth / 2,
+        timerY,
+        boxWidth,
+        boxHeight,
+        8
+    );
+
+    ctx.fill();
+    ctx.stroke();
+
+
+    /*
+        Stopwatch text.
+    */
+
+    ctx.fillStyle =
+        "#8de4ff";
+
+    ctx.shadowBlur =
+        10;
+
+    ctx.shadowColor =
+        "#229dff";
+
+
+    ctx.fillText(
+        timerText,
+        timerX,
+        timerY +
+        boxHeight / 2
+    );
+
+
+    /*
+        Grid label.
+    */
+
+    ctx.shadowBlur = 0;
+
+    ctx.textAlign =
+        "left";
+
+    ctx.font =
+        "bold 12px Arial";
+
+    ctx.fillStyle =
+        "rgba(150,220,255,0.8)";
+
+
     ctx.fillText(
         "25 × 25",
         arenaLeft,
         arenaTop - 12
     );
 
-    if (laserActive) {
 
-        ctx.fillStyle = "#67dfff";
-        ctx.shadowBlur = 10;
-        ctx.shadowColor = "#39caff";
+    /*
+        Blue laser indicator.
+    */
+
+    if (
+        laserActive
+    ) {
+
+        ctx.textAlign =
+            "right";
+
+        ctx.fillStyle =
+            "#67dfff";
+
+        ctx.shadowBlur =
+            10;
+
+        ctx.shadowColor =
+            "#39caff";
+
 
         ctx.fillText(
             "LASER ACTIVE",
-            arenaLeft + arenaSize - 90,
+            arenaLeft +
+            arenaSize,
             arenaTop - 12
         );
+
     }
 
+
+    /*
+        Red trail status.
+
+        This is deliberately subtle so it
+        doesn't clutter the game.
+    */
+
+    ctx.textAlign =
+        "left";
+
+    ctx.font =
+        "bold 10px Arial";
+
+
+    if (
+        enemyTrailActive
+    ) {
+
+        ctx.fillStyle =
+            "rgba(255,70,90,0.7)";
+
+        ctx.fillText(
+            "RED TRAIL ON",
+            arenaLeft,
+            arenaTop +
+            arenaSize +
+            18
+        );
+
+    } else {
+
+        ctx.fillStyle =
+            "rgba(255,70,90,0.35)";
+
+        ctx.fillText(
+            "RED TRAIL OFF",
+            arenaLeft,
+            arenaTop +
+            arenaSize +
+            18
+        );
+
+    }
+
+
     ctx.restore();
+
+}
+
+
+/* =========================================================
+   MESSAGE
+   ========================================================= */
+
+function showMessage(
+    title,
+    text
+) {
+
+    messageTitle.textContent =
+        title;
+
+    messageText.textContent =
+        text;
+
+    message.style.opacity =
+        "1";
+
+}
+
+
+function hideMessage() {
+
+    message.style.opacity =
+        "0";
+
 }
 
 
@@ -1295,88 +2529,112 @@ function drawHUD() {
 
 function draw() {
 
-    ctx.clearRect(0, 0, width, height);
+    ctx.clearRect(
+        0,
+        0,
+        width,
+        height
+    );
+
 
     drawBackground();
 
     drawArena();
 
-    /*
-       The red cycle always leaves its red light trail.
-    */
-
-    drawTrail(
-        enemyTrail,
-        ENEMY_COLOR
-    );
 
     /*
-       The player's blue trail only appears
-       after a double tap activates the laser.
+        RED TRAIL
+
+        It is only drawn when the red
+        cycle's random trail is active.
     */
 
-    if (player.trailEnabled) {
+    if (
+        enemyTrailActive
+    ) {
+
+        drawTrail(
+            enemyTrail,
+            ENEMY_COLOR
+        );
+
+    }
+
+
+    /*
+        BLUE PLAYER TRAIL
+    */
+
+    if (
+        player.trailEnabled
+    ) {
 
         drawTrail(
             playerTrail,
             PLAYER_COLOR
         );
+
     }
 
+
+    /*
+        Cycles.
+    */
+
     drawCycle(enemy);
+
     drawCycle(player);
 
+
+    /*
+        HUD / stopwatch.
+    */
+
     drawHUD();
+
 }
 
 
 /* =========================================================
-   MESSAGE
-   ========================================================= */
-
-function showMessage(title, text) {
-
-    messageTitle.textContent = title;
-    messageText.textContent = text;
-
-    message.style.opacity = "1";
-}
-
-
-function hideMessage() {
-
-    message.style.opacity = "0";
-}
-
-
-/* =========================================================
-   GAME LOOP
+   MAIN LOOP
    ========================================================= */
 
 function loop(time) {
 
-    const dt = Math.min(
-        (time - lastTime) / 1000,
-        0.04
-    );
+    const dt =
+        Math.min(
+            (time - lastTime) / 1000,
+            0.04
+        );
 
-    lastTime = time;
+
+    lastTime =
+        time;
+
 
     update(dt);
+
     draw();
 
-    requestAnimationFrame(loop);
+
+    requestAnimationFrame(
+        loop
+    );
+
 }
 
 
 /* =========================================================
-   START
+   START GAME
    ========================================================= */
 
 resize();
+
 resetGame();
 
-requestAnimationFrame(loop);
+requestAnimationFrame(
+    loop
+);
 
 </script>
 
