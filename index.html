@@ -1,0 +1,1978 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport"
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+
+<title>Neon Cube</title>
+
+<style>
+* {
+    box-sizing: border-box;
+    -webkit-tap-highlight-color: transparent;
+}
+
+html,
+body {
+    margin: 0;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    background: #080b18;
+    font-family: Arial, Helvetica, sans-serif;
+    touch-action: none;
+}
+
+body {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+#gameWrap {
+    position: relative;
+    width: 100vw;
+    height: 100vh;
+    overflow: hidden;
+}
+
+canvas {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    display: block;
+    image-rendering: pixelated;
+    touch-action: none;
+}
+
+/* ---------------- UI ---------------- */
+
+#hud {
+    position: absolute;
+    top: 18px;
+    left: 0;
+    width: 100%;
+    padding: 0 18px;
+
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+
+    color: white;
+    font-weight: bold;
+    font-size: 15px;
+
+    pointer-events: none;
+    z-index: 10;
+}
+
+#attemptText {
+    text-shadow: 0 2px 4px #000;
+}
+
+#percentText {
+    text-shadow: 0 2px 4px #000;
+}
+
+/* progress */
+
+#progressOuter {
+    position: absolute;
+    top: 45px;
+    left: 50%;
+    transform: translateX(-50%);
+
+    width: min(500px, 70vw);
+    height: 8px;
+
+    border: 2px solid rgba(255,255,255,.8);
+    border-radius: 20px;
+
+    background: rgba(0,0,0,.35);
+
+    overflow: hidden;
+    z-index: 10;
+    pointer-events: none;
+}
+
+#progressInner {
+    width: 0%;
+    height: 100%;
+
+    background: #58f6ff;
+
+    box-shadow:
+        0 0 8px #58f6ff,
+        0 0 18px #58f6ff;
+}
+
+/* pause */
+
+#pauseButton {
+    position: absolute;
+    top: 70px;
+    right: 18px;
+
+    width: 48px;
+    height: 48px;
+
+    border: 2px solid white;
+    border-radius: 10px;
+
+    background: rgba(0,0,0,.45);
+    color: white;
+
+    font-size: 21px;
+    font-weight: bold;
+
+    z-index: 30;
+    touch-action: manipulation;
+}
+
+/* menus */
+
+.menu {
+    position: absolute;
+    inset: 0;
+
+    display: none;
+    align-items: center;
+    justify-content: center;
+
+    background: rgba(4,6,18,.78);
+
+    z-index: 50;
+}
+
+.menuBox {
+    width: min(430px, 88vw);
+
+    padding: 30px;
+
+    border: 3px solid #58f6ff;
+    border-radius: 20px;
+
+    background:
+        linear-gradient(
+            145deg,
+            rgba(18,26,60,.98),
+            rgba(8,12,30,.98)
+        );
+
+    box-shadow:
+        0 0 20px rgba(88,246,255,.35),
+        inset 0 0 30px rgba(88,246,255,.05);
+
+    text-align: center;
+    color: white;
+}
+
+.menuBox h1 {
+    margin: 0 0 12px;
+    font-size: 38px;
+    color: #58f6ff;
+    text-shadow: 0 0 12px #58f6ff;
+}
+
+.menuBox p {
+    margin: 8px 0 22px;
+    color: #dce8ff;
+}
+
+.menuButton {
+    width: 100%;
+    padding: 14px;
+    margin-top: 10px;
+
+    border: 2px solid white;
+    border-radius: 10px;
+
+    background: #162b55;
+    color: white;
+
+    font-size: 17px;
+    font-weight: bold;
+
+    touch-action: manipulation;
+}
+
+.menuButton:active {
+    transform: scale(.97);
+    background: #254d89;
+}
+
+#startMenu {
+    display: flex;
+}
+
+/* mobile instructions */
+
+#tapHint {
+    position: absolute;
+    bottom: 18px;
+    left: 50%;
+    transform: translateX(-50%);
+
+    color: rgba(255,255,255,.8);
+
+    font-size: 13px;
+    font-weight: bold;
+
+    text-shadow: 0 2px 5px black;
+
+    pointer-events: none;
+    z-index: 8;
+}
+
+@media (min-width: 900px) and (pointer: fine) {
+    #tapHint::after {
+        content: "SPACE / CLICK TO JUMP";
+    }
+
+    #tapHint {
+        font-size: 0;
+    }
+
+    #tapHint::after {
+        font-size: 13px;
+    }
+}
+</style>
+</head>
+
+<body>
+
+<div id="gameWrap">
+
+    <canvas id="game"></canvas>
+
+    <div id="hud">
+        <div id="attemptText">ATTEMPT 1</div>
+        <div id="percentText">0%</div>
+    </div>
+
+    <div id="progressOuter">
+        <div id="progressInner"></div>
+    </div>
+
+    <button id="pauseButton">Ⅱ</button>
+
+    <div id="tapHint">TAP ANYWHERE TO JUMP</div>
+
+    <!-- START MENU -->
+    <div class="menu" id="startMenu">
+        <div class="menuBox">
+            <h1>NEON CUBE</h1>
+            <p>
+                Jump, flip gravity, dodge obstacles,
+                and reach the end of the level.
+            </p>
+
+            <button class="menuButton" id="startButton">
+                PLAY
+            </button>
+        </div>
+    </div>
+
+    <!-- PAUSE MENU -->
+    <div class="menu" id="pauseMenu">
+        <div class="menuBox">
+            <h1>PAUSED</h1>
+
+            <button class="menuButton" id="resumeButton">
+                RESUME
+            </button>
+
+            <button class="menuButton" id="restartButton">
+                RESTART
+            </button>
+        </div>
+    </div>
+
+    <!-- DEATH MENU -->
+    <div class="menu" id="deathMenu">
+        <div class="menuBox">
+            <h1>CRASHED</h1>
+            <p id="deathPercent">You reached 0%</p>
+
+            <button class="menuButton" id="retryButton">
+                TRY AGAIN
+            </button>
+        </div>
+    </div>
+
+    <!-- WIN MENU -->
+    <div class="menu" id="winMenu">
+        <div class="menuBox">
+            <h1>LEVEL COMPLETE!</h1>
+            <p>You made it to the end.</p>
+
+            <button class="menuButton" id="playAgainButton">
+                PLAY AGAIN
+            </button>
+        </div>
+    </div>
+
+</div>
+
+<script>
+
+/* =========================================================
+   CANVAS
+========================================================= */
+
+const canvas = document.getElementById("game");
+const ctx = canvas.getContext("2d");
+
+let W = 1280;
+let H = 720;
+
+function resize() {
+    W = window.innerWidth;
+    H = window.innerHeight;
+
+    canvas.width = W;
+    canvas.height = H;
+
+    groundY = H * 0.78;
+}
+
+window.addEventListener("resize", resize);
+
+
+/* =========================================================
+   GAME SETTINGS
+========================================================= */
+
+const SPEED = 6.5;
+const GRAVITY = 0.75;
+const JUMP_POWER = 14.5;
+
+const PLAYER_SIZE = 38;
+
+let groundY = H * 0.78;
+
+const LEVEL_LENGTH = 19000;
+
+let gameState = "menu";
+
+let attempt = 1;
+
+let cameraX = 0;
+
+let levelTime = 0;
+
+let shake = 0;
+
+let deathTimer = 0;
+
+
+/* =========================================================
+   PLAYER
+========================================================= */
+
+const player = {
+
+    x: 180,
+    y: 0,
+
+    vx: SPEED,
+    vy: 0,
+
+    size: PLAYER_SIZE,
+
+    rotation: 0,
+
+    gravityDirection: 1,
+
+    grounded: false,
+
+    dead: false,
+
+    portalCooldown: 0
+
+};
+
+
+function resetPlayer() {
+
+    player.x = 180;
+
+    player.y = groundY - player.size;
+
+    player.vx = SPEED;
+
+    player.vy = 0;
+
+    player.rotation = 0;
+
+    player.gravityDirection = 1;
+
+    player.grounded = true;
+
+    player.dead = false;
+
+    player.portalCooldown = 0;
+
+    cameraX = 0;
+
+    levelTime = 0;
+
+    shake = 0;
+}
+
+
+/* =========================================================
+   LEVEL OBJECTS
+========================================================= */
+
+let obstacles = [];
+
+let platforms = [];
+
+let portals = [];
+
+let particles = [];
+
+let stars = [];
+
+
+/* =========================================================
+   CREATE LEVEL
+========================================================= */
+
+function buildLevel() {
+
+    obstacles = [];
+    platforms = [];
+    portals = [];
+
+    /* ---------------- SPIKES ---------------- */
+
+    addSpike(900);
+    addSpike(1150);
+
+    addSpike(1450);
+    addSpike(1495);
+    addSpike(1540);
+
+    addSpike(1900);
+
+    addSpike(2300);
+    addSpike(2345);
+
+    addSpike(2800);
+    addSpike(2845);
+    addSpike(2890);
+
+    addSpike(3350);
+
+    addSpike(3650);
+    addSpike(3695);
+
+    addSpike(4100);
+    addSpike(4145);
+    addSpike(4190);
+
+    addSpike(4700);
+
+    addSpike(5100);
+    addSpike(5145);
+    addSpike(5190);
+
+    addSpike(5700);
+
+    addSpike(6200);
+    addSpike(6245);
+
+    addSpike(6750);
+    addSpike(6795);
+    addSpike(6840);
+
+    addSpike(7350);
+
+    addSpike(7800);
+    addSpike(7845);
+
+    addSpike(8300);
+    addSpike(8345);
+    addSpike(8390);
+
+    addSpike(9000);
+
+    addSpike(9450);
+    addSpike(9495);
+    addSpike(9540);
+
+    addSpike(10100);
+
+    addSpike(10700);
+    addSpike(10745);
+
+    addSpike(11300);
+    addSpike(11345);
+    addSpike(11390);
+
+    addSpike(12000);
+
+    addSpike(12600);
+    addSpike(12645);
+
+    addSpike(13200);
+    addSpike(13245);
+    addSpike(13290);
+
+    addSpike(13900);
+
+    addSpike(14500);
+    addSpike(14545);
+
+    addSpike(15100);
+    addSpike(15145);
+    addSpike(15190);
+
+    addSpike(15800);
+
+    addSpike(16400);
+    addSpike(16445);
+
+    addSpike(17000);
+    addSpike(17045);
+    addSpike(17090);
+
+    addSpike(17700);
+
+    /* ---------------- BLOCKS ---------------- */
+
+    addPlatform(1200, groundY - 115, 150, 28);
+    addPlatform(1650, groundY - 155, 150, 28);
+
+    addPlatform(2150, groundY - 110, 190, 28);
+    addPlatform(2600, groundY - 150, 160, 28);
+
+    addPlatform(3100, groundY - 100, 220, 28);
+
+    addPlatform(3900, groundY - 150, 180, 28);
+
+    addPlatform(4500, groundY - 105, 200, 28);
+
+    addPlatform(5400, groundY - 160, 170, 28);
+
+    addPlatform(5900, groundY - 105, 190, 28);
+
+    addPlatform(6500, groundY - 155, 180, 28);
+
+    addPlatform(7100, groundY - 105, 230, 28);
+
+    addPlatform(7600, groundY - 155, 180, 28);
+
+    addPlatform(8100, groundY - 100, 200, 28);
+
+    addPlatform(8750, groundY - 150, 180, 28);
+
+    addPlatform(9300, groundY - 105, 220, 28);
+
+    addPlatform(9900, groundY - 150, 190, 28);
+
+    addPlatform(10400, groundY - 105, 210, 28);
+
+    addPlatform(11000, groundY - 155, 180, 28);
+
+    addPlatform(11600, groundY - 105, 220, 28);
+
+    addPlatform(12300, groundY - 155, 190, 28);
+
+    addPlatform(12900, groundY - 105, 210, 28);
+
+    addPlatform(13500, groundY - 150, 180, 28);
+
+    addPlatform(14200, groundY - 105, 220, 28);
+
+    addPlatform(14800, groundY - 150, 190, 28);
+
+    addPlatform(15400, groundY - 105, 220, 28);
+
+    addPlatform(16100, groundY - 150, 190, 28);
+
+    addPlatform(16700, groundY - 105, 220, 28);
+
+    addPlatform(17300, groundY - 150, 190, 28);
+
+    /* ---------------- GRAVITY PORTALS ---------------- */
+
+    addPortal(5200, "gravity");
+
+    addPortal(8900, "gravity");
+
+    addPortal(12100, "gravity");
+
+    addPortal(15600, "gravity");
+
+    /* ---------------- SPEED PORTALS ---------------- */
+
+    addPortal(7300, "speed");
+
+    addPortal(13700, "speed");
+
+    /* ---------------- EXIT ---------------- */
+
+    portals.push({
+        x: LEVEL_LENGTH - 500,
+        type: "finish"
+    });
+
+}
+
+
+/* =========================================================
+   LEVEL HELPERS
+========================================================= */
+
+function addSpike(x) {
+
+    obstacles.push({
+        x: x,
+        y: groundY - 46,
+        width: 46,
+        height: 46
+    });
+
+}
+
+
+function addPlatform(x, y, width, height) {
+
+    platforms.push({
+        x,
+        y,
+        width,
+        height
+    });
+
+}
+
+
+function addPortal(x, type) {
+
+    portals.push({
+        x,
+        type
+    });
+
+}
+
+
+/* =========================================================
+   BACKGROUND STARS
+========================================================= */
+
+function createStars() {
+
+    stars = [];
+
+    for (let i = 0; i < 180; i++) {
+
+        stars.push({
+            x: Math.random() * LEVEL_LENGTH,
+            y: Math.random() * H * .65,
+            size: Math.random() * 3 + 1,
+            speed: Math.random() * .35 + .1
+        });
+
+    }
+
+}
+
+
+/* =========================================================
+   INPUT
+========================================================= */
+
+function jump() {
+
+    if (gameState !== "playing") return;
+
+    if (player.dead) return;
+
+    if (player.grounded) {
+
+        player.vy = -JUMP_POWER * player.gravityDirection;
+
+        player.grounded = false;
+
+        createJumpParticles();
+
+    }
+
+}
+
+
+document.addEventListener("keydown", e => {
+
+    if (
+        e.code === "Space" ||
+        e.code === "ArrowUp" ||
+        e.code === "KeyW"
+    ) {
+
+        e.preventDefault();
+
+        jump();
+
+    }
+
+    if (e.code === "Escape" || e.code === "KeyP") {
+
+        togglePause();
+
+    }
+
+});
+
+
+document.addEventListener("pointerdown", e => {
+
+    if (e.target.closest("button")) return;
+
+    if (gameState === "playing") {
+
+        jump();
+
+    }
+
+});
+
+
+/* =========================================================
+   BUTTONS
+========================================================= */
+
+const startMenu = document.getElementById("startMenu");
+const pauseMenu = document.getElementById("pauseMenu");
+const deathMenu = document.getElementById("deathMenu");
+const winMenu = document.getElementById("winMenu");
+
+document.getElementById("startButton").onclick = startGame;
+
+document.getElementById("resumeButton").onclick = () => {
+
+    gameState = "playing";
+
+    pauseMenu.style.display = "none";
+
+};
+
+document.getElementById("restartButton").onclick = () => {
+
+    startGame();
+
+};
+
+document.getElementById("retryButton").onclick = () => {
+
+    startGame();
+
+};
+
+document.getElementById("playAgainButton").onclick = () => {
+
+    startGame();
+
+};
+
+document.getElementById("pauseButton").onclick = togglePause;
+
+
+function startGame() {
+
+    resetPlayer();
+
+    attempt++;
+
+    gameState = "playing";
+
+    startMenu.style.display = "none";
+    pauseMenu.style.display = "none";
+    deathMenu.style.display = "none";
+    winMenu.style.display = "none";
+
+    updateHUD();
+
+}
+
+
+function togglePause() {
+
+    if (gameState === "playing") {
+
+        gameState = "paused";
+
+        pauseMenu.style.display = "flex";
+
+    }
+    else if (gameState === "paused") {
+
+        gameState = "playing";
+
+        pauseMenu.style.display = "none";
+
+    }
+
+}
+
+
+/* =========================================================
+   COLLISION
+========================================================= */
+
+function rectsOverlap(a, b) {
+
+    return (
+        a.x < b.x + b.width &&
+        a.x + a.width > b.x &&
+        a.y < b.y + b.height &&
+        a.y + a.height > b.y
+    );
+
+}
+
+
+/* =========================================================
+   PLAYER UPDATE
+========================================================= */
+
+function updatePlayer(dt) {
+
+    if (player.dead) return;
+
+    player.portalCooldown -= dt;
+
+    player.x += player.vx * dt;
+
+    player.vy += GRAVITY * player.gravityDirection * dt;
+
+    if (player.vy > 18) player.vy = 18;
+
+    if (player.vy < -18) player.vy = -18;
+
+    player.y += player.vy * dt;
+
+    player.grounded = false;
+
+
+    /* ---------------- FLOOR ---------------- */
+
+    if (player.gravityDirection === 1) {
+
+        if (
+            player.y + player.size >= groundY
+        ) {
+
+            player.y = groundY - player.size;
+
+            player.vy = 0;
+
+            player.grounded = true;
+
+            player.rotation = snapRotation(
+                player.rotation
+            );
+
+        }
+
+    }
+    else {
+
+        const ceiling = 80;
+
+        if (player.y <= ceiling) {
+
+            player.y = ceiling;
+
+            player.vy = 0;
+
+            player.grounded = true;
+
+            player.rotation = snapRotation(
+                player.rotation
+            );
+
+        }
+
+    }
+
+
+    /* ---------------- PLATFORMS ---------------- */
+
+    for (const platform of platforms) {
+
+        if (
+            player.x + player.size > platform.x &&
+            player.x < platform.x + platform.width
+        ) {
+
+            if (player.gravityDirection === 1) {
+
+                if (
+                    player.y + player.size >= platform.y &&
+                    player.y + player.size <= platform.y + 25 &&
+                    player.vy >= 0
+                ) {
+
+                    player.y = platform.y - player.size;
+
+                    player.vy = 0;
+
+                    player.grounded = true;
+
+                    player.rotation =
+                        snapRotation(player.rotation);
+
+                }
+
+            }
+            else {
+
+                const bottom = platform.y + platform.height;
+
+                if (
+                    player.y <= bottom &&
+                    player.y >= bottom - 25 &&
+                    player.vy <= 0
+                ) {
+
+                    player.y = bottom;
+
+                    player.vy = 0;
+
+                    player.grounded = true;
+
+                    player.rotation =
+                        snapRotation(player.rotation);
+
+                }
+
+            }
+
+        }
+
+    }
+
+
+    /* ---------------- ROTATION ---------------- */
+
+    if (!player.grounded) {
+
+        player.rotation +=
+            .055 * player.gravityDirection;
+
+    }
+
+
+    /* ---------------- SPIKES ---------------- */
+
+    const hitbox = {
+
+        x: player.x + 6,
+        y: player.y + 6,
+        width: player.size - 12,
+        height: player.size - 12
+
+    };
+
+    for (const spike of obstacles) {
+
+        const spikeBox = {
+
+            x: spike.x + 7,
+            y: spike.y + 8,
+            width: spike.width - 14,
+            height: spike.height - 8
+
+        };
+
+        if (rectsOverlap(hitbox, spikeBox)) {
+
+            die();
+
+            return;
+
+        }
+
+    }
+
+
+    /* ---------------- FALLING ---------------- */
+
+    if (
+        player.y > H + 200 ||
+        player.y < -300
+    ) {
+
+        die();
+
+        return;
+
+    }
+
+
+    /* ---------------- PORTALS ---------------- */
+
+    for (const portal of portals) {
+
+        if (
+            player.portalCooldown <= 0 &&
+            Math.abs(
+                player.x - portal.x
+            ) < 40
+        ) {
+
+            activatePortal(portal);
+
+        }
+
+    }
+
+
+    /* ---------------- FINISH ---------------- */
+
+    if (player.x >= LEVEL_LENGTH - 350) {
+
+        win();
+
+    }
+
+}
+
+
+/* =========================================================
+   PORTALS
+========================================================= */
+
+function activatePortal(portal) {
+
+    player.portalCooldown = 35;
+
+    createPortalParticles(portal.x, player.y);
+
+    if (portal.type === "gravity") {
+
+        player.gravityDirection *= -1;
+
+        player.vy = 0;
+
+        player.grounded = false;
+
+        shake = 8;
+
+    }
+
+    if (portal.type === "speed") {
+
+        player.vx =
+            player.vx > 0 ? 8.5 : -8.5;
+
+        shake = 5;
+
+    }
+
+}
+
+
+/* =========================================================
+   ROTATION
+========================================================= */
+
+function snapRotation(rotation) {
+
+    const quarter = Math.PI / 2;
+
+    return Math.round(
+        rotation / quarter
+    ) * quarter;
+
+}
+
+
+/* =========================================================
+   DEATH
+========================================================= */
+
+function die() {
+
+    if (player.dead) return;
+
+    player.dead = true;
+
+    gameState = "dead";
+
+    deathTimer = 0;
+
+    shake = 18;
+
+    createExplosion(
+        player.x + player.size / 2,
+        player.y + player.size / 2
+    );
+
+    const percent = Math.min(
+        99,
+        Math.floor(
+            (player.x / LEVEL_LENGTH) * 100
+        )
+    );
+
+    document.getElementById("deathPercent").textContent =
+        "You reached " + percent + "%";
+
+    setTimeout(() => {
+
+        if (gameState === "dead") {
+
+            deathMenu.style.display = "flex";
+
+        }
+
+    }, 650);
+
+}
+
+
+/* =========================================================
+   WIN
+========================================================= */
+
+function win() {
+
+    if (gameState !== "playing") return;
+
+    gameState = "won";
+
+    createExplosion(
+        player.x,
+        player.y
+    );
+
+    winMenu.style.display = "flex";
+
+}
+
+
+/* =========================================================
+   PARTICLES
+========================================================= */
+
+function createParticle(x, y, vx, vy, life, size) {
+
+    particles.push({
+
+        x,
+        y,
+        vx,
+        vy,
+
+        life,
+        maxLife: life,
+
+        size
+
+    });
+
+}
+
+
+function createJumpParticles() {
+
+    for (let i = 0; i < 8; i++) {
+
+        createParticle(
+
+            player.x + player.size / 2,
+
+            player.y + player.size,
+
+            (Math.random() - .5) * 3,
+
+            Math.random() * 2,
+
+            20 + Math.random() * 15,
+
+            Math.random() * 5 + 2
+
+        );
+
+    }
+
+}
+
+
+function createExplosion(x, y) {
+
+    for (let i = 0; i < 45; i++) {
+
+        const angle =
+            Math.random() * Math.PI * 2;
+
+        const speed =
+            Math.random() * 7 + 2;
+
+        createParticle(
+
+            x,
+            y,
+
+            Math.cos(angle) * speed,
+
+            Math.sin(angle) * speed,
+
+            35 + Math.random() * 35,
+
+            Math.random() * 7 + 2
+
+        );
+
+    }
+
+}
+
+
+function createPortalParticles(x, y) {
+
+    for (let i = 0; i < 20; i++) {
+
+        createParticle(
+
+            x + (Math.random() - .5) * 20,
+
+            y + (Math.random() - .5) * 50,
+
+            (Math.random() - .5) * 4,
+
+            (Math.random() - .5) * 4,
+
+            25 + Math.random() * 25,
+
+            Math.random() * 5 + 2
+
+        );
+
+    }
+
+}
+
+
+function updateParticles(dt) {
+
+    for (let i = particles.length - 1; i >= 0; i--) {
+
+        const p = particles[i];
+
+        p.x += p.vx * dt;
+
+        p.y += p.vy * dt;
+
+        p.vy += .15 * dt;
+
+        p.life -= dt;
+
+        if (p.life <= 0) {
+
+            particles.splice(i, 1);
+
+        }
+
+    }
+
+}
+
+
+/* =========================================================
+   CAMERA
+========================================================= */
+
+function updateCamera() {
+
+    const target =
+        player.x - W * .3;
+
+    cameraX +=
+        (target - cameraX) * .1;
+
+    cameraX = Math.max(
+        0,
+        Math.min(
+            LEVEL_LENGTH - W,
+            cameraX
+        )
+    );
+
+}
+
+
+/* =========================================================
+   DRAW BACKGROUND
+========================================================= */
+
+function drawBackground() {
+
+    const gradient =
+        ctx.createLinearGradient(
+            0,
+            0,
+            0,
+            H
+        );
+
+    gradient.addColorStop(
+        0,
+        "#101b4d"
+    );
+
+    gradient.addColorStop(
+        1,
+        "#080b20"
+    );
+
+    ctx.fillStyle = gradient;
+
+    ctx.fillRect(
+        0,
+        0,
+        W,
+        H
+    );
+
+
+    /* stars */
+
+    for (const star of stars) {
+
+        const sx =
+            star.x - cameraX * star.speed;
+
+        if (
+            sx < -10 ||
+            sx > W + 10
+        ) continue;
+
+        ctx.globalAlpha =
+            .35 + Math.sin(
+                levelTime * .05 + star.x
+            ) * .2;
+
+        ctx.fillStyle = "#ffffff";
+
+        ctx.fillRect(
+            sx,
+            star.y,
+            star.size,
+            star.size
+        );
+
+    }
+
+    ctx.globalAlpha = 1;
+
+
+    /* distant grid */
+
+    ctx.strokeStyle =
+        "rgba(88,246,255,.07)";
+
+    ctx.lineWidth = 1;
+
+    const gridSize = 80;
+
+    const offset =
+        -(cameraX % gridSize);
+
+    for (
+        let x = offset;
+        x < W;
+        x += gridSize
+    ) {
+
+        ctx.beginPath();
+
+        ctx.moveTo(x, 0);
+
+        ctx.lineTo(x, H);
+
+        ctx.stroke();
+
+    }
+
+    for (
+        let y = 0;
+        y < H;
+        y += gridSize
+    ) {
+
+        ctx.beginPath();
+
+        ctx.moveTo(0, y);
+
+        ctx.lineTo(W, y);
+
+        ctx.stroke();
+
+    }
+
+}
+
+
+/* =========================================================
+   DRAW GROUND
+========================================================= */
+
+function drawGround() {
+
+    const y =
+        player.gravityDirection === 1
+            ? groundY
+            : 80;
+
+    const height =
+        player.gravityDirection === 1
+            ? H - groundY
+            : 100;
+
+    ctx.fillStyle = "#111b39";
+
+    ctx.fillRect(
+        0,
+        y,
+        W,
+        height
+    );
+
+
+    ctx.fillStyle = "#58f6ff";
+
+    ctx.fillRect(
+        0,
+        y,
+        W,
+        5
+    );
+
+
+    ctx.fillStyle =
+        "rgba(88,246,255,.1)";
+
+    for (
+        let x = -((cameraX * .5) % 80);
+        x < W;
+        x += 80
+    ) {
+
+        ctx.fillRect(
+            x,
+            y + 20,
+            40,
+            5
+        );
+
+    }
+
+}
+
+
+/* =========================================================
+   DRAW PLATFORMS
+========================================================= */
+
+function drawPlatforms() {
+
+    for (const p of platforms) {
+
+        const x =
+            p.x - cameraX;
+
+        if (
+            x + p.width < 0 ||
+            x > W
+        ) continue;
+
+        ctx.fillStyle = "#182a50";
+
+        ctx.fillRect(
+            x,
+            p.y,
+            p.width,
+            p.height
+        );
+
+        ctx.fillStyle = "#58f6ff";
+
+        ctx.fillRect(
+            x,
+            p.y,
+            p.width,
+            5
+        );
+
+        ctx.strokeStyle =
+            "rgba(255,255,255,.25)";
+
+        ctx.strokeRect(
+            x,
+            p.y,
+            p.width,
+            p.height
+        );
+
+    }
+
+}
+
+
+/* =========================================================
+   DRAW SPIKES
+========================================================= */
+
+function drawSpikes() {
+
+    for (const spike of obstacles) {
+
+        const x =
+            spike.x - cameraX;
+
+        if (
+            x + spike.width < 0 ||
+            x > W
+        ) continue;
+
+        ctx.beginPath();
+
+        ctx.moveTo(
+            x,
+            spike.y + spike.height
+        );
+
+        ctx.lineTo(
+            x + spike.width / 2,
+            spike.y
+        );
+
+        ctx.lineTo(
+            x + spike.width,
+            spike.y + spike.height
+        );
+
+        ctx.closePath();
+
+        ctx.fillStyle = "#ff3e79";
+
+        ctx.fill();
+
+        ctx.strokeStyle = "#ffffff";
+
+        ctx.lineWidth = 2;
+
+        ctx.stroke();
+
+        ctx.fillStyle =
+            "rgba(255,62,121,.35)";
+
+        ctx.fillRect(
+            x - 5,
+            spike.y + spike.height - 5,
+            spike.width + 10,
+            8
+        );
+
+    }
+
+}
+
+
+/* =========================================================
+   DRAW PORTALS
+========================================================= */
+
+function drawPortals() {
+
+    for (const portal of portals) {
+
+        const x =
+            portal.x - cameraX;
+
+        if (
+            x < -100 ||
+            x > W + 100
+        ) continue;
+
+        if (portal.type === "finish") {
+
+            drawFinish(x);
+
+            continue;
+
+        }
+
+        let color =
+            portal.type === "gravity"
+                ? "#b45cff"
+                : "#ffcf45";
+
+        const pulse =
+            Math.sin(levelTime * .12) * 5;
+
+        ctx.save();
+
+        ctx.translate(
+            x,
+            H * .45
+        );
+
+        ctx.strokeStyle = color;
+
+        ctx.lineWidth = 8;
+
+        ctx.shadowBlur = 20;
+
+        ctx.shadowColor = color;
+
+        ctx.beginPath();
+
+        ctx.ellipse(
+            0,
+            0,
+            28 + pulse,
+            70 + pulse,
+            0,
+            0,
+            Math.PI * 2
+        );
+
+        ctx.stroke();
+
+        ctx.lineWidth = 3;
+
+        ctx.beginPath();
+
+        ctx.ellipse(
+            0,
+            0,
+            15,
+            58,
+            0,
+            0,
+            Math.PI * 2
+        );
+
+        ctx.stroke();
+
+        ctx.restore();
+
+    }
+
+}
+
+
+/* =========================================================
+   FINISH
+========================================================= */
+
+function drawFinish(x) {
+
+    ctx.fillStyle = "#ffffff";
+
+    ctx.fillRect(
+        x,
+        100,
+        7,
+        groundY - 100
+    );
+
+    ctx.fillStyle = "#58f6ff";
+
+    ctx.beginPath();
+
+    ctx.moveTo(x + 7, 100);
+
+    ctx.lineTo(x + 100, 130);
+
+    ctx.lineTo(x + 7, 160);
+
+    ctx.closePath();
+
+    ctx.fill();
+
+}
+
+
+/* =========================================================
+   DRAW PLAYER
+========================================================= */
+
+function drawPlayer() {
+
+    const x =
+        player.x - cameraX;
+
+    const y =
+        player.y;
+
+    ctx.save();
+
+    ctx.translate(
+        x + player.size / 2,
+        y + player.size / 2
+    );
+
+    ctx.rotate(player.rotation);
+
+    /* glow */
+
+    ctx.shadowBlur = 18;
+
+    ctx.shadowColor =
+        "#58f6ff";
+
+    /* cube */
+
+    ctx.fillStyle =
+        "#58f6ff";
+
+    ctx.fillRect(
+        -player.size / 2,
+        -player.size / 2,
+        player.size,
+        player.size
+    );
+
+    ctx.shadowBlur = 0;
+
+    /* inner cube */
+
+    ctx.fillStyle =
+        "#12234c";
+
+    ctx.fillRect(
+        -player.size / 2 + 6,
+        -player.size / 2 + 6,
+        player.size - 12,
+        player.size - 12
+    );
+
+    /* face */
+
+    ctx.fillStyle =
+        "#ffffff";
+
+    ctx.fillRect(
+        -11,
+        -7,
+        6,
+        6
+    );
+
+    ctx.fillRect(
+        5,
+        -7,
+        6,
+        6
+    );
+
+    ctx.fillRect(
+        -9,
+        8,
+        18,
+        4
+    );
+
+    ctx.restore();
+
+}
+
+
+/* =========================================================
+   DRAW PARTICLES
+========================================================= */
+
+function drawParticles() {
+
+    for (const p of particles) {
+
+        const alpha =
+            Math.max(
+                0,
+                p.life / p.maxLife
+            );
+
+        ctx.globalAlpha = alpha;
+
+        ctx.fillStyle = "#58f6ff";
+
+        ctx.fillRect(
+            p.x - cameraX,
+            p.y,
+            p.size,
+            p.size
+        );
+
+    }
+
+    ctx.globalAlpha = 1;
+
+}
+
+
+/* =========================================================
+   HUD
+========================================================= */
+
+function updateHUD() {
+
+    const percent = Math.min(
+        100,
+        Math.floor(
+            (player.x / LEVEL_LENGTH) * 100
+        )
+    );
+
+    document.getElementById(
+        "percentText"
+    ).textContent =
+        percent + "%";
+
+    document.getElementById(
+        "attemptText"
+    ).textContent =
+        "ATTEMPT " + attempt;
+
+    document.getElementById(
+        "progressInner"
+    ).style.width =
+        percent + "%";
+
+}
+
+
+/* =========================================================
+   GAME UPDATE
+========================================================= */
+
+function update(dt) {
+
+    if (gameState !== "playing") {
+
+        updateParticles(dt);
+
+        return;
+
+    }
+
+    levelTime += dt;
+
+    updatePlayer(dt);
+
+    updateCamera();
+
+    updateParticles(dt);
+
+    updateHUD();
+
+    if (shake > 0) {
+
+        shake *= .88;
+
+        if (shake < .1) {
+
+            shake = 0;
+
+        }
+
+    }
+
+}
+
+
+/* =========================================================
+   DRAW EVERYTHING
+========================================================= */
+
+function draw() {
+
+    ctx.save();
+
+    if (shake > 0) {
+
+        ctx.translate(
+            (Math.random() - .5) * shake,
+            (Math.random() - .5) * shake
+        );
+
+    }
+
+    drawBackground();
+
+    drawGround();
+
+    drawPlatforms();
+
+    drawSpikes();
+
+    drawPortals();
+
+    drawParticles();
+
+    if (!player.dead) {
+
+        drawPlayer();
+
+    }
+
+    ctx.restore();
+
+}
+
+
+/* =========================================================
+   GAME LOOP
+========================================================= */
+
+let lastTime = performance.now();
+
+function gameLoop(now) {
+
+    let dt =
+        (now - lastTime) / 16.6667;
+
+    lastTime = now;
+
+    if (dt > 2) dt = 2;
+
+    update(dt);
+
+    draw();
+
+    requestAnimationFrame(gameLoop);
+
+}
+
+
+/* =========================================================
+   INITIALIZE
+========================================================= */
+
+resize();
+
+buildLevel();
+
+createStars();
+
+resetPlayer();
+
+updateHUD();
+
+requestAnimationFrame(gameLoop);
+
+</script>
+
+</body>
+</html>
