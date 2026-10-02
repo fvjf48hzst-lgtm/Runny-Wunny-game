@@ -2003,264 +2003,12 @@ function enemyAI() {
 
     ];
 
-    /*
-     * This is separate from isPositionDangerous()
-     * because the normal collision code intentionally
-     * ignores the newest 5 trail segments.
-     *
-     * The AI cannot do that.
-     *
-     * It needs to know about the ENTIRE enemy trail,
-     * especially the fresh trail directly behind it,
-     * otherwise a quick turn can send it straight back
-     * into itself.
-     */
-    function enemyTrailDanger(
-        x,
-        y
-    ) {
-
-        if (
-            !enemyTrailActive ||
-            enemyTrail.length < 2
-        ) {
-
-            return false;
-        }
-
-        for (
-            let i = 0;
-            i < enemyTrail.length - 1;
-            i++
-        ) {
-
-            const a =
-                enemyTrail[i];
-
-            const b =
-                enemyTrail[i + 1];
-
-            if (
-                pointToSegmentDistance(
-                    x,
-                    y,
-                    a.x,
-                    a.y,
-                    b.x,
-                    b.y
-                ) < 0.34
-            ) {
-
-                /*
-                 * Ignore the tiny section that is
-                 * literally underneath the current
-                 * enemy position.
-                 *
-                 * We only care whether the candidate
-                 * movement would run into the trail.
-                 */
-                if (
-                    Math.hypot(
-                        x - enemy.x,
-                        y - enemy.y
-                    ) > 0.18
-                ) {
-
-                    return true;
-                }
-            }
-        }
-
-        return false;
-    }
-
-    /*
-     * Complete AI danger check.
-     *
-     * Own trail gets special treatment above.
-     */
-    function enemyDanger(
-        x,
-        y
-    ) {
-
-        if (
-            x < 0.8 ||
-            x > GRID_SIZE - 0.8 ||
-            y < 0.8 ||
-            y > GRID_SIZE - 0.8
-        ) {
-
-            return true;
-        }
-
-        if (
-            enemyTrailDanger(
-                x,
-                y
-            )
-        ) {
-
-            return true;
-        }
-
-        if (
-            checkTrailCollision(
-                { x, y },
-                playerTrail
-            )
-        ) {
-
-            return true;
-        }
-
-        return false;
-    }
-
-    /*
-     * Check a direction immediately in front of
-     * the enemy.
-     *
-     * This happens BEFORE scoring.
-     *
-     * A dangerous direction doesn't get a bad score.
-     * It gets removed completely.
-     */
-    function pathIsSafe(
-        direction
-    ) {
-
-        const distances = [
-
-            0.35,
-            0.7,
-            1.0,
-            1.3,
-            1.7,
-            2.1
-
-        ];
-
-        for (
-            const distance of distances
-        ) {
-
-            const x =
-                enemy.x +
-                direction.x *
-                distance;
-
-            const y =
-                enemy.y +
-                direction.y *
-                distance;
-
-            if (
-                enemyDanger(
-                    x,
-                    y
-                )
-            ) {
-
-                return false;
-            }
-        }
-
-        return true;
-    }
-
-    /*
-     * Measure the amount of genuinely safe space
-     * in a direction.
-     */
-    function measureSpace(
-        direction,
-        maxDistance
-    ) {
-
-        let space = 0;
-
-        const step = 0.5;
-
-        for (
-            let distance = 0.5;
-            distance <= maxDistance;
-            distance += step
-        ) {
-
-            const x =
-                enemy.x +
-                direction.x *
-                distance;
-
-            const y =
-                enemy.y +
-                direction.y *
-                distance;
-
-            if (
-                enemyDanger(
-                    x,
-                    y
-                )
-            ) {
-
-                break;
-            }
-
-            space += step;
-        }
-
-        return space;
-    }
-
-    /*
-     * Look around a future position.
-     */
-    function countFutureOpenings(
-        x,
-        y
-    ) {
-
-        let openings = 0;
-
-        for (
-            const direction of directions
-        ) {
-
-            const testX =
-                x +
-                direction.x *
-                1.25;
-
-            const testY =
-                y +
-                direction.y *
-                1.25;
-
-            if (
-                !enemyDanger(
-                    testX,
-                    testY
-                )
-            ) {
-
-                openings++;
-            }
-        }
-
-        return openings;
-    }
-
     const candidates = [];
 
     for (
         const direction of directions
     ) {
 
-        /*
-         * Never reverse directly.
-         */
         if (
             direction.x === -enemy.dir.x &&
             direction.y === -enemy.dir.y
@@ -2269,35 +2017,201 @@ function enemyAI() {
             continue;
         }
 
-        /*
-         * FIRST PRIORITY:
-         *
-         * If the direction immediately points
-         * toward the enemy's own trail, reject it.
-         */
         if (
-            !pathIsSafe(
-                direction
+            directionHasDanger(
+                direction,
+                ENEMY_LOOK_AHEAD
             )
         ) {
 
             continue;
         }
 
-        /*
-         * Measure actual free space.
-         */
-        const immediateSpace =
-            measureSpace(
-                direction,
-                7
+        let sideDanger = false;
+
+        const sideX =
+            -direction.y *
+            ENEMY_SIDE_CHECK;
+
+        const sideY =
+            direction.x *
+            ENEMY_SIDE_CHECK;
+
+        for (
+            let distance = 1;
+            distance <= 4;
+            distance++
+        ) {
+
+            const forwardX =
+                enemy.x +
+                direction.x *
+                distance;
+
+            const forwardY =
+                enemy.y +
+                direction.y *
+                distance;
+
+            if (
+
+                isPositionDangerous(
+                    forwardX + sideX,
+                    forwardY + sideY
+                )
+
+                ||
+
+                isPositionDangerous(
+                    forwardX - sideX,
+                    forwardY - sideY
+                )
+
+            ) {
+
+                sideDanger = true;
+
+                break;
+            }
+        }
+
+        let score = 0;
+
+        if (
+            direction.x === enemy.dir.x &&
+            direction.y === enemy.dir.y
+        ) {
+
+            score += 8;
+        }
+
+        const openSpace =
+            countOpenDirections(
+                enemy.x +
+                direction.x * 2,
+
+                enemy.y +
+                direction.y * 2
             );
 
-        /*
-         * Don't voluntarily enter a tiny dead end.
-         */
+        score +=
+            openSpace * 5;
+
+        if (sideDanger) {
+
+            score -= 10;
+        }
+
+        for (
+            let distance = 1;
+            distance <= 4;
+            distance++
+        ) {
+
+            const checkX =
+                enemy.x +
+                direction.x *
+                distance;
+
+            const checkY =
+                enemy.y +
+                direction.y *
+                distance;
+
+            if (
+                isPositionDangerous(
+                    checkX,
+                    checkY
+                )
+            ) {
+
+                score -= 100;
+            }
+        }
+
+        const futureX =
+            enemy.x +
+            direction.x * 5;
+
+        const futureY =
+            enemy.y +
+            direction.y * 5;
+
+        const distanceToPlayer =
+
+            Math.abs(
+                futureX - player.x
+            )
+
+            +
+
+            Math.abs(
+                futureY - player.y
+            );
+
+        score +=
+
+            Math.max(
+                0,
+                12 - distanceToPlayer
+            )
+
+            * 0.35;
+
+        candidates.push({
+
+            direction,
+
+            score
+
+        });
+    }
+
+    if (
+        candidates.length > 0
+    ) {
+
+        candidates.sort(
+            (a, b) =>
+                b.score - a.score
+        );
+
+        const bestScore =
+            candidates[0].score;
+
+        const goodChoices =
+            candidates.filter(
+                candidate =>
+                    candidate.score >=
+                    bestScore - 4
+            );
+
+        const choice =
+            goodChoices[
+                Math.floor(
+                    Math.random() *
+                    goodChoices.length
+                )
+            ];
+
+        enemy.dir =
+            choice.direction;
+
+        return;
+    }
+
+    let emergencyChoice = null;
+
+    let emergencyScore =
+        -Infinity;
+
+    for (
+        const direction of directions
+    ) {
+
         if (
-            immediateSpace < 1.5
+            direction.x === -enemy.dir.x &&
+            direction.y === -enemy.dir.y
         ) {
 
             continue;
@@ -2305,276 +2219,69 @@ function enemyAI() {
 
         let score = 0;
 
-        /*
-         * Open space is the strongest factor.
-         */
-        score +=
-            immediateSpace * 8;
-
-        /*
-         * Look slightly farther into the route.
-         */
-        const futureX =
-            enemy.x +
-            direction.x *
-            3;
-
-        const futureY =
-            enemy.y +
-            direction.y *
-            3;
-
-        if (
-            futureX >= 0 &&
-            futureX < GRID_SIZE &&
-            futureY >= 0 &&
-            futureY < GRID_SIZE
-        ) {
-
-            const futureOpenings =
-                countFutureOpenings(
-                    futureX,
-                    futureY
-                );
-
-            score +=
-                futureOpenings * 4;
-
-            /*
-             * Reward continued space.
-             */
-            const continuedSpace =
-                measureSpace(
-                    direction,
-                    5
-                );
-
-            score +=
-                continuedSpace * 1.5;
-        }
-
-        /*
-         * Avoid hugging the wall unless there
-         * isn't a better option.
-         */
-        const nextX =
-            enemy.x +
-            direction.x;
-
-        const nextY =
-            enemy.y +
-            direction.y;
-
-        const wallDistance =
-            Math.min(
-                nextX,
-                GRID_SIZE - 1 - nextX,
-                nextY,
-                GRID_SIZE - 1 - nextY
-            );
-
-        if (
-            wallDistance <= 1
-        ) {
-
-            score -= 8;
-
-        } else if (
-            wallDistance >= 4
-        ) {
-
-            score += 3;
-        }
-
-        /*
-         * Slight preference for continuing forward.
-         *
-         * This prevents unnecessary zig-zagging,
-         * but it isn't strong enough to force him
-         * into a bad route.
-         */
-        if (
-            direction.x === enemy.dir.x &&
-            direction.y === enemy.dir.y
-        ) {
-
-            score += 4;
-        }
-
-        /*
-         * Small turning variation.
-         */
-        else {
-
-            score +=
-                randomRange(
-                    -1,
-                    4
-                );
-        }
-
-        /*
-         * Small randomness.
-         *
-         * This keeps him from selecting the exact
-         * same route every time.
-         */
-        score +=
-            randomRange(
-                -3,
-                3
-            );
-
-        candidates.push({
-
-            direction,
-
-            score,
-
-            space:
-                immediateSpace
-
-        });
-    }
-
-    /*
-     * Normal decision.
-     */
-    if (
-        candidates.length > 0
-    ) {
-
-        candidates.sort(
-            (a, b) =>
-                b.score -
-                a.score
-        );
-
-        const bestScore =
-            candidates[0].score;
-
-        /*
-         * Keep several reasonably good choices
-         * instead of always taking #1.
-         */
-        const goodChoices =
-            candidates.filter(
-                candidate =>
-                    candidate.score >=
-                    bestScore - 6
-            );
-
-        /*
-         * Weighted randomness.
-         *
-         * A clearly better path is more likely,
-         * but the AI can still surprise you.
-         */
-        let totalWeight = 0;
-
         for (
-            const choice of goodChoices
+            let distance = 0.5;
+            distance <= 3;
+            distance += 0.5
         ) {
 
-            const difference =
-                bestScore -
-                choice.score;
+            const x =
+                enemy.x +
+                direction.x *
+                distance;
 
-            choice.weight =
-                Math.max(
-                    1,
-                    7 -
-                    difference
-                );
-
-            totalWeight +=
-                choice.weight;
-        }
-
-        let roll =
-            Math.random() *
-            totalWeight;
-
-        for (
-            const choice of goodChoices
-        ) {
-
-            roll -=
-                choice.weight;
+            const y =
+                enemy.y +
+                direction.y *
+                distance;
 
             if (
-                roll <= 0
+
+                x < 0.5 ||
+
+                x > GRID_SIZE - 0.5 ||
+
+                y < 0.5 ||
+
+                y > GRID_SIZE - 0.5
+
             ) {
 
-                enemy.dir =
-                    choice.direction;
+                score -= 20;
 
-                return;
+            }
+
+            else if (
+                isPositionDangerous(
+                    x,
+                    y
+                )
+            ) {
+
+                score -= 15;
+
+            }
+
+            else {
+
+                score += 3;
             }
         }
 
-        enemy.dir =
-            goodChoices[0].direction;
-
-        return;
-    }
-
-    /*
-     * EMERGENCY MODE
-     *
-     * If normal choices are unavailable,
-     * find the safest direction with the most
-     * available space.
-     */
-    let emergencyChoice =
-        null;
-
-    let emergencySpace =
-        -1;
-
-    for (
-        const direction of directions
-    ) {
-
         if (
-            direction.x === -enemy.dir.x &&
-            direction.y === -enemy.dir.y
+            score >
+            emergencyScore
         ) {
 
-            continue;
-        }
-
-        if (
-            !pathIsSafe(
-                direction
-            )
-        ) {
-
-            continue;
-        }
-
-        const space =
-            measureSpace(
-                direction,
-                6
-            );
-
-        if (
-            space >
-            emergencySpace
-        ) {
-
-            emergencySpace =
-                space;
+            emergencyScore =
+                score;
 
             emergencyChoice =
                 direction;
         }
     }
 
-    if (
-        emergencyChoice
-    ) {
+    if (emergencyChoice) {
 
         enemy.dir =
             emergencyChoice;
