@@ -82,15 +82,15 @@ body.redMode {
 }
 
 /* =========================================================
-   ORANGE MODE — 2:00 TO 2:15
+   YELLOW MODE — 2:00 TO 2:15
    ========================================================= */
 
 body.orangeMode {
     background:
         radial-gradient(
             circle at center,
-            #3a1600 0%,
-            #180800 55%,
+            #353500 0%,
+            #181800 55%,
             #000000 100%
         );
 }
@@ -246,32 +246,32 @@ canvas.redMode {
 }
 
 /* =========================================================
-   ORANGE CANVAS MODE
+   YELLOW CANVAS MODE
    ========================================================= */
 
 canvas.orangeMode {
 
     background:
         linear-gradient(
-            rgba(255, 110, 0, 0.06) 1px,
+            rgba(255, 220, 0, 0.06) 1px,
             transparent 1px
         ),
         linear-gradient(
             90deg,
-            rgba(255, 110, 0, 0.06) 1px,
+            rgba(255, 220, 0, 0.06) 1px,
             transparent 1px
         ),
         radial-gradient(
             circle,
-            #351500 0%,
-            #0a0300 70%
+            #353500 0%,
+            #0a0a00 70%
         );
 
-    border-color: #ff7200;
+    border-color: #ffff00;
 
     box-shadow:
-        0 0 14px #ff7200,
-        inset 0 0 35px rgba(255, 100, 0, 0.3);
+        0 0 14px #ffff00,
+        inset 0 0 35px rgba(255, 255, 0, 0.3);
 }
 
 /* =========================================================
@@ -1388,29 +1388,12 @@ function updateHUD() {
     /*
         Enemy colors:
         0:00 - 2:00       = RED
-        2:00 - 2:15       = ORANGE
-        2:15+             = YELLOW
+        2:00 - 2:15       = YELLOW
+        2:15+             = ORANGE
     */
 
     if (
         survivalTime >= 135
-    ) {
-
-        enemyStatus.textContent =
-
-            enemyTrailActive
-                ? "YELLOW TRAIL ON"
-                : "YELLOW TRAIL OFF";
-
-        enemyStatus.style.color =
-            "#ffff00";
-
-        enemyStatus.style.textShadow =
-            "0 0 8px #ffff00";
-
-    } else if (
-        survivalTime >= 120 &&
-        survivalTime < 135
     ) {
 
         enemyStatus.textContent =
@@ -1424,6 +1407,23 @@ function updateHUD() {
 
         enemyStatus.style.textShadow =
             "0 0 8px #ff7200";
+
+    } else if (
+        survivalTime >= 120 &&
+        survivalTime < 135
+    ) {
+
+        enemyStatus.textContent =
+
+            enemyTrailActive
+                ? "YELLOW TRAIL ON"
+                : "YELLOW TRAIL OFF";
+
+        enemyStatus.style.color =
+            "#ffff00";
+
+        enemyStatus.style.textShadow =
+            "0 0 8px #ffff00";
 
     } else {
 
@@ -1453,7 +1453,7 @@ function updateHUD() {
    0:00 - 0:59.99  = BLUE
    1:00 - 1:29.99  = RED
    1:30 - 1:59.99  = BLUE
-   2:00 - 2:14.99  = ORANGE
+   2:00 - 2:14.99  = YELLOW
    2:15+            = BLUE
    ========================================================= */
 
@@ -1825,9 +1825,9 @@ function checkCollisions() {
 
             endGame(
                 survivalTime >= 135
-                    ? "YOU HIT THE YELLOW TRAIL!"
+                    ? "YOU HIT THE ORANGE TRAIL!"
                     : survivalTime >= 120
-                        ? "YOU HIT THE ORANGE TRAIL!"
+                        ? "YOU HIT THE YELLOW TRAIL!"
                         : survivalTime >= 60 &&
                           survivalTime < 90
                             ? "YOU HIT THE RED TRAIL!"
@@ -1846,9 +1846,9 @@ function checkCollisions() {
 
             endGame(
                 survivalTime >= 135
-                    ? "YELLOW CYCLE HIT ITS TRAIL!"
+                    ? "ORANGE CYCLE HIT ITS TRAIL!"
                     : survivalTime >= 120
-                        ? "ORANGE CYCLE HIT ITS TRAIL!"
+                        ? "YELLOW CYCLE HIT ITS TRAIL!"
                         : "RED CYCLE HIT ITS TRAIL!"
             );
 
@@ -2298,7 +2298,7 @@ function getEnemyColor() {
         survivalTime >= 135
     ) {
 
-        return "#ffff00";
+        return "#ff7200";
     }
 
     if (
@@ -2306,7 +2306,7 @@ function getEnemyColor() {
         survivalTime < 135
     ) {
 
-        return "#ff7200";
+        return "#ffff00";
     }
 
     return "#ff2222";
@@ -2318,7 +2318,7 @@ function getEnemyDarkColor() {
         survivalTime >= 135
     ) {
 
-        return "#242400";
+        return "#241000";
     }
 
     if (
@@ -2326,7 +2326,7 @@ function getEnemyDarkColor() {
         survivalTime < 135
     ) {
 
-        return "#241000";
+        return "#242400";
     }
 
     return "#200000";
@@ -2343,7 +2343,7 @@ function drawGrid() {
     ) {
 
         ctx.strokeStyle =
-            "rgba(255, 110, 0, 0.16)";
+            "rgba(255, 220, 0, 0.16)";
 
     } else if (
         document.body.classList.contains(
@@ -2622,9 +2622,13 @@ function draw() {
 
         player,
 
-        "#00c8ff",
+        survivalTime >= 165
+            ? "#ffffff"
+            : "#00c8ff",
 
-        "#00141f"
+        survivalTime >= 165
+            ? "#151515"
+            : "#00141f"
 
     );
 
