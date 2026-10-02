@@ -5,532 +5,574 @@
 
 <meta
   name="viewport"
-  content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
+  content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover"
 >
 
 <title>TRON</title>
 
 <style>
-  * {
-    box-sizing: border-box;
-    -webkit-tap-highlight-color: transparent;
-  }
+* {
+  box-sizing: border-box;
+  -webkit-tap-highlight-color: transparent;
+}
 
-  html,
-  body {
-    width: 100%;
-    height: 100%;
-    margin: 0;
-    overflow: hidden;
+html,
+body {
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  padding: 0;
 
-    display: flex;
-    align-items: center;
-    justify-content: center;
+  overflow: hidden;
 
-    background:
-      radial-gradient(circle at center,
-        #001b2d 0%,
-        #000814 45%,
-        #000000 100%);
+  background:
+    radial-gradient(
+      circle at center,
+      #001b2d 0%,
+      #000814 45%,
+      #000000 100%
+    );
 
-    color: white;
+  color: white;
 
-    font-family:
-      Arial,
-      Helvetica,
-      sans-serif;
+  font-family: Arial, Helvetica, sans-serif;
 
-    touch-action: none;
-    user-select: none;
+  touch-action: none;
+  user-select: none;
+  -webkit-user-select: none;
+}
 
-    padding:
-      env(safe-area-inset-top)
-      env(safe-area-inset-right)
-      env(safe-area-inset-bottom)
-      env(safe-area-inset-left);
-  }
+body.redMode {
+  background:
+    radial-gradient(
+      circle at center,
+      #320000 0%,
+      #140000 45%,
+      #000000 100%
+    );
+}
 
-  body.redMode {
-    background:
-      radial-gradient(circle at center,
-        #320000 0%,
-        #140000 45%,
-        #000000 100%);
-  }
+body.orangeMode {
+  background:
+    radial-gradient(
+      circle at center,
+      #351500 0%,
+      #160800 45%,
+      #000000 100%
+    );
+}
 
-  body.orangeMode {
-    background:
-      radial-gradient(circle at center,
-        #351500 0%,
-        #160800 45%,
-        #000000 100%);
-  }
+
+/* =========================================================
+   GAME WRAPPER
+   ========================================================= */
+
+#gameWrapper {
+  position: fixed;
+
+  left: 50%;
+  top: 50%;
+
+  transform: translate(-50%, -50%);
+
+  width: min(94vw, 94vh, 700px);
+  height: min(94vw, 94vh, 700px);
+
+  width: min(94vw, 94svh, 700px);
+  height: min(94vw, 94svh, 700px);
+
+  overflow: hidden;
+}
+
+
+/* =========================================================
+   CANVAS
+   ========================================================= */
+
+#gameCanvas {
+  position: absolute;
+
+  inset: 0;
+
+  display: block;
+
+  width: 100%;
+  height: 100%;
+
+  background:
+    linear-gradient(
+      rgba(0, 170, 255, 0.055) 1px,
+      transparent 1px
+    ),
+    linear-gradient(
+      90deg,
+      rgba(0, 170, 255, 0.055) 1px,
+      transparent 1px
+    ),
+    #000b14;
+
+  background-size:
+    calc(100% / 25)
+    calc(100% / 25);
+
+  border: 2px solid #00aaff;
+
+  box-shadow:
+    0 0 8px #00aaff,
+    0 0 25px rgba(0, 170, 255, 0.45),
+    inset 0 0 35px rgba(0, 170, 255, 0.12);
+
+  border-radius: 2px;
+}
+
+#gameCanvas.redMode {
+  background:
+    linear-gradient(
+      rgba(255, 40, 40, 0.065) 1px,
+      transparent 1px
+    ),
+    linear-gradient(
+      90deg,
+      rgba(255, 40, 40, 0.065) 1px,
+      transparent 1px
+    ),
+    #120000;
+
+  background-size:
+    calc(100% / 25)
+    calc(100% / 25);
+
+  border-color: #ff2222;
+
+  box-shadow:
+    0 0 8px #ff2222,
+    0 0 28px rgba(255, 34, 34, 0.55),
+    inset 0 0 35px rgba(255, 34, 34, 0.14);
+}
+
+#gameCanvas.orangeMode {
+  background:
+    linear-gradient(
+      rgba(255, 106, 0, 0.075) 1px,
+      transparent 1px
+    ),
+    linear-gradient(
+      90deg,
+      rgba(255, 106, 0, 0.075) 1px,
+      transparent 1px
+    ),
+    #160900;
+
+  background-size:
+    calc(100% / 25)
+    calc(100% / 25);
+
+  border-color: #ff6a00;
+
+  box-shadow:
+    0 0 8px #ff6a00,
+    0 0 30px rgba(255, 106, 0, 0.6),
+    inset 0 0 35px rgba(255, 106, 0, 0.16);
+}
+
+
+/* =========================================================
+   HUD
+   ========================================================= */
+
+#hud {
+  position: absolute;
+
+  top: 10px;
+  left: 0;
+  right: 0;
+
+  display: flex;
+  justify-content: center;
+
+  pointer-events: none;
+
+  z-index: 20;
+}
+
+#stopwatch {
+  font-size: clamp(18px, 4vw, 30px);
+
+  font-weight: bold;
+
+  letter-spacing: 3px;
+
+  color: #00eaff;
+
+  text-shadow:
+    0 0 5px #00eaff,
+    0 0 15px #00aaff,
+    0 0 30px #0088ff;
+}
+
+
+/* =========================================================
+   BUTTONS
+   ========================================================= */
+
+#pauseButton,
+#musicButton {
+  position: absolute;
+
+  top: 10px;
+
+  width: 42px;
+  height: 42px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  border: 1px solid #00aaff;
+
+  background: rgba(0, 12, 25, 0.88);
+
+  color: #00eaff;
+
+  font-size: 20px;
+  font-weight: bold;
+
+  border-radius: 5px;
+
+  box-shadow:
+    0 0 7px #00aaff,
+    inset 0 0 8px rgba(0, 170, 255, 0.2);
+
+  z-index: 60;
+
+  cursor: pointer;
+
+  touch-action: manipulation;
+
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+#pauseButton {
+  right: 10px;
+}
+
+#musicButton {
+  left: 10px;
+}
+
+#pauseButton:active,
+#musicButton:active {
+  transform: scale(0.94);
+}
+
+body.redMode #pauseButton,
+body.redMode #musicButton {
+  border-color: #ff2222;
+  color: #ff4444;
+
+  box-shadow:
+    0 0 8px #ff2222,
+    inset 0 0 8px rgba(255, 34, 34, 0.2);
+}
+
+body.orangeMode #pauseButton,
+body.orangeMode #musicButton {
+  border-color: #ff6a00;
+  color: #ff8a33;
+
+  box-shadow:
+    0 0 8px #ff6a00,
+    inset 0 0 8px rgba(255, 106, 0, 0.2);
+}
+
+
+/* =========================================================
+   STATUS
+   ========================================================= */
+
+#laserStatus {
+  position: absolute;
+
+  left: 12px;
+  bottom: 10px;
+
+  color: #00eaff;
+
+  font-size: clamp(9px, 2vw, 13px);
+
+  font-weight: bold;
+
+  letter-spacing: 1px;
+
+  text-shadow:
+    0 0 5px #00eaff;
+
+  z-index: 20;
+
+  pointer-events: none;
+}
+
+#enemyStatus {
+  position: absolute;
+
+  right: 12px;
+  bottom: 10px;
+
+  color: #ff2222;
+
+  font-size: clamp(9px, 2vw, 13px);
+
+  font-weight: bold;
+
+  letter-spacing: 1px;
+
+  text-shadow:
+    0 0 5px #ff2222;
+
+  z-index: 20;
+
+  pointer-events: none;
+}
+
+
+/* =========================================================
+   MENUS
+   ========================================================= */
+
+#startMenu,
+#pauseMenu,
+#gameOverMenu {
+  position: absolute;
+
+  inset: 0;
+
+  display: flex;
+
+  align-items: center;
+  justify-content: center;
+
+  background: rgba(0, 0, 0, 0.72);
+
+  z-index: 50;
+}
+
+#pauseMenu,
+#gameOverMenu {
+  display: none;
+}
+
+#startBox,
+#pauseBox,
+#gameOverBox {
+  width: min(84%, 420px);
+
+  padding: 30px 22px;
+
+  text-align: center;
+
+  background:
+    rgba(0, 8, 18, 0.94);
+
+  border: 1px solid #00aaff;
+
+  box-shadow:
+    0 0 12px #00aaff,
+    0 0 45px rgba(0, 170, 255, 0.28),
+    inset 0 0 30px rgba(0, 170, 255, 0.08);
+
+  border-radius: 6px;
+}
+
+#tronTitle {
+  margin: 0;
+
+  font-size: clamp(52px, 14vw, 90px);
+
+  letter-spacing: 8px;
+
+  color: #00eaff;
+
+  text-shadow:
+    0 0 6px #00eaff,
+    0 0 20px #00aaff,
+    0 0 45px #0088ff;
+}
+
+#subtitle {
+  margin-top: 5px;
+  margin-bottom: 30px;
+
+  color: #6fdfff;
+
+  font-size: clamp(11px, 3vw, 15px);
+
+  letter-spacing: 5px;
+}
+
+#pauseBox h2,
+#gameOverBox h2 {
+  margin-top: 0;
+
+  color: #00eaff;
+
+  letter-spacing: 5px;
+
+  text-shadow:
+    0 0 8px #00eaff;
+}
+
+#gameOverTitle {
+  color: #ff2222 !important;
+
+  text-shadow:
+    0 0 8px #ff2222,
+    0 0 20px #ff2222 !important;
+}
+
+#deathReason {
+  color: #ff5555;
+
+  font-weight: bold;
+
+  letter-spacing: 2px;
+}
+
+#finalTimeLabel {
+  margin-top: 22px;
+
+  font-size: 11px;
+
+  letter-spacing: 3px;
+
+  color: #888;
+}
+
+#finalTime {
+  margin: 5px 0 25px;
+
+  font-size: 32px;
+
+  color: #00eaff;
+
+  letter-spacing: 3px;
+
+  text-shadow:
+    0 0 8px #00eaff;
+}
+
+
+/* =========================================================
+   MENU BUTTONS
+   ========================================================= */
+
+.menuButton {
+  display: block;
+
+  width: 100%;
+
+  margin: 10px 0;
+
+  padding: 14px 16px;
+
+  border: 1px solid #00aaff;
+
+  background:
+    rgba(0, 30, 50, 0.78);
+
+  color: #00eaff;
+
+  font-size: 14px;
+
+  font-weight: bold;
+
+  letter-spacing: 2px;
+
+  border-radius: 3px;
+
+  box-shadow:
+    0 0 7px rgba(0, 170, 255, 0.6);
+
+  cursor: pointer;
+
+  touch-action: manipulation;
+
+  -webkit-appearance: none;
+  appearance: none;
+}
+
+.menuButton:active {
+  transform: scale(0.97);
+
+  background:
+    rgba(0, 80, 120, 0.8);
+}
+
+
+/* =========================================================
+   MESSAGE
+   ========================================================= */
+
+#gameMessage {
+  position: absolute;
+
+  inset: 0;
+
+  display: none;
+
+  align-items: center;
+  justify-content: center;
+
+  pointer-events: none;
+
+  z-index: 40;
+}
+
+#messageText {
+  padding: 12px 20px;
+
+  border: 1px solid #00aaff;
+
+  color: #00eaff;
+
+  background: rgba(0, 0, 0, 0.7);
+
+  box-shadow:
+    0 0 12px #00aaff;
+
+  font-weight: bold;
+
+  letter-spacing: 3px;
+}
+
+
+/* =========================================================
+   SMALL PHONES
+   ========================================================= */
+
+@media (max-width: 480px) {
 
   #gameWrapper {
-    position: relative;
-
-    width: min(
-      94vw,
-      94vh,
-      700px
-    );
-
-    height: min(
-      94vw,
-      94vh,
-      700px
-    );
-
-    width: min(
-      94vw,
-      94dvh,
-      700px
-    );
-
-    height: min(
-      94vw,
-      94dvh,
-      700px
-    );
-
-    display: flex;
-    align-items: center;
-    justify-content: center;
-  }
-
-  #gameCanvas {
-    display: block;
-
-    width: 100%;
-    height: 100%;
-
-    background:
-      linear-gradient(
-        rgba(0, 170, 255, 0.055) 1px,
-        transparent 1px
-      ),
-      linear-gradient(
-        90deg,
-        rgba(0, 170, 255, 0.055) 1px,
-        transparent 1px
-      ),
-      #000b14;
-
-    background-size:
-      calc(100% / 25)
-      calc(100% / 25);
-
-    border: 2px solid #00aaff;
-
-    box-shadow:
-      0 0 8px #00aaff,
-      0 0 25px rgba(0, 170, 255, 0.45),
-      inset 0 0 35px rgba(0, 170, 255, 0.12);
-
-    border-radius: 2px;
-  }
-
-  #gameCanvas.redMode {
-    background:
-      linear-gradient(
-        rgba(255, 40, 40, 0.065) 1px,
-        transparent 1px
-      ),
-      linear-gradient(
-        90deg,
-        rgba(255, 40, 40, 0.065) 1px,
-        transparent 1px
-      ),
-      #120000;
-
-    background-size:
-      calc(100% / 25)
-      calc(100% / 25);
-
-    border-color: #ff2222;
-
-    box-shadow:
-      0 0 8px #ff2222,
-      0 0 28px rgba(255, 34, 34, 0.55),
-      inset 0 0 35px rgba(255, 34, 34, 0.14);
-  }
-
-  #gameCanvas.orangeMode {
-    background:
-      linear-gradient(
-        rgba(255, 106, 0, 0.075) 1px,
-        transparent 1px
-      ),
-      linear-gradient(
-        90deg,
-        rgba(255, 106, 0, 0.075) 1px,
-        transparent 1px
-      ),
-      #160900;
-
-    background-size:
-      calc(100% / 25)
-      calc(100% / 25);
-
-    border-color: #ff6a00;
-
-    box-shadow:
-      0 0 8px #ff6a00,
-      0 0 30px rgba(255, 106, 0, 0.6),
-      inset 0 0 35px rgba(255, 106, 0, 0.16);
-  }
-
-  /* ---------------- HUD ---------------- */
-
-  #hud {
-    position: absolute;
-
-    top: 10px;
-    left: 0;
-    right: 0;
-
-    display: flex;
-    justify-content: center;
-
-    pointer-events: none;
-
-    z-index: 10;
-  }
-
-  #stopwatch {
-    font-size: clamp(18px, 4vw, 30px);
-    font-weight: bold;
-    letter-spacing: 3px;
-
-    color: #00eaff;
-
-    text-shadow:
-      0 0 5px #00eaff,
-      0 0 15px #00aaff,
-      0 0 30px #0088ff;
-  }
-
-  #pauseButton,
-  #musicButton {
-    position: absolute;
-
-    top: 10px;
-
-    width: 42px;
-    height: 42px;
-
-    display: flex;
-    align-items: center;
-    justify-content: center;
-
-    border: 1px solid #00aaff;
-
-    background: rgba(0, 12, 25, 0.78);
-
-    color: #00eaff;
-
-    font-size: 21px;
-    font-weight: bold;
-
-    border-radius: 5px;
-
-    box-shadow:
-      0 0 7px #00aaff,
-      inset 0 0 8px rgba(0, 170, 255, 0.2);
-
-    z-index: 30;
-
-    cursor: pointer;
-
-    touch-action: manipulation;
-  }
-
-  #pauseButton {
-    right: 10px;
-  }
-
-  #musicButton {
-    left: 10px;
-
-    font-size: 19px;
-  }
-
-  #pauseButton:active,
-  #musicButton:active {
-    transform: scale(0.94);
-  }
-
-  body.redMode #pauseButton,
-  body.redMode #musicButton {
-    border-color: #ff2222;
-    color: #ff4444;
-
-    box-shadow:
-      0 0 8px #ff2222,
-      inset 0 0 8px rgba(255, 34, 34, 0.2);
-  }
-
-  body.orangeMode #pauseButton,
-  body.orangeMode #musicButton {
-    border-color: #ff6a00;
-    color: #ff8a33;
-
-    box-shadow:
-      0 0 8px #ff6a00,
-      inset 0 0 8px rgba(255, 106, 0, 0.2);
-  }
-
-  #laserStatus {
-    position: absolute;
-
-    left: 12px;
-    bottom: 10px;
-
-    color: #00eaff;
-
-    font-size: clamp(9px, 2vw, 13px);
-    font-weight: bold;
-
-    letter-spacing: 1px;
-
-    text-shadow:
-      0 0 5px #00eaff;
-
-    z-index: 10;
-  }
-
-  #enemyStatus {
-    position: absolute;
-
-    right: 12px;
-    bottom: 10px;
-
-    color: #ff2222;
-
-    font-size: clamp(9px, 2vw, 13px);
-    font-weight: bold;
-
-    letter-spacing: 1px;
-
-    text-shadow:
-      0 0 5px #ff2222;
-
-    z-index: 10;
-  }
-
-  /* ---------------- MENUS ---------------- */
-
-  #startMenu,
-  #pauseMenu,
-  #gameOverMenu {
-    position: absolute;
-
-    inset: 0;
-
-    display: flex;
-    align-items: center;
-    justify-content: center;
-
-    background: rgba(0, 0, 0, 0.72);
-
-    z-index: 50;
-  }
-
-  #pauseMenu,
-  #gameOverMenu {
-    display: none;
+    width: min(94vw, 94svh);
+    height: min(94vw, 94svh);
   }
 
   #startBox,
   #pauseBox,
   #gameOverBox {
-    width: min(84%, 420px);
-
-    padding: 30px 22px;
-
-    text-align: center;
-
-    background:
-      rgba(0, 8, 18, 0.92);
-
-    border: 1px solid #00aaff;
-
-    box-shadow:
-      0 0 12px #00aaff,
-      0 0 45px rgba(0, 170, 255, 0.28),
-      inset 0 0 30px rgba(0, 170, 255, 0.08);
-
-    border-radius: 6px;
+    padding: 24px 18px;
   }
 
-  #tronTitle {
-    margin: 0;
-
-    font-size: clamp(52px, 14vw, 90px);
-
-    letter-spacing: 8px;
-
-    color: #00eaff;
-
-    text-shadow:
-      0 0 6px #00eaff,
-      0 0 20px #00aaff,
-      0 0 45px #0088ff;
+  #musicButton,
+  #pauseButton {
+    width: 38px;
+    height: 38px;
   }
+}
 
-  #subtitle {
-    margin-top: 5px;
-    margin-bottom: 30px;
-
-    color: #6fdfff;
-
-    font-size: clamp(11px, 3vw, 15px);
-
-    letter-spacing: 5px;
-  }
-
-  #pauseBox h2,
-  #gameOverBox h2 {
-    margin-top: 0;
-
-    color: #00eaff;
-
-    letter-spacing: 5px;
-
-    text-shadow:
-      0 0 8px #00eaff;
-  }
-
-  #gameOverTitle {
-    color: #ff2222 !important;
-
-    text-shadow:
-      0 0 8px #ff2222,
-      0 0 20px #ff2222 !important;
-  }
-
-  #deathReason {
-    color: #ff5555;
-
-    font-weight: bold;
-
-    letter-spacing: 2px;
-  }
-
-  #finalTimeLabel {
-    margin-top: 22px;
-
-    font-size: 11px;
-
-    letter-spacing: 3px;
-
-    color: #888;
-  }
-
-  #finalTime {
-    margin: 5px 0 25px;
-
-    font-size: 32px;
-
-    color: #00eaff;
-
-    letter-spacing: 3px;
-
-    text-shadow:
-      0 0 8px #00eaff;
-  }
-
-  .menuButton {
-    display: block;
-
-    width: 100%;
-
-    margin: 10px 0;
-
-    padding: 13px 16px;
-
-    border: 1px solid #00aaff;
-
-    background:
-      rgba(0, 30, 50, 0.72);
-
-    color: #00eaff;
-
-    font-size: 14px;
-    font-weight: bold;
-
-    letter-spacing: 2px;
-
-    border-radius: 3px;
-
-    box-shadow:
-      0 0 7px rgba(0, 170, 255, 0.6);
-
-    cursor: pointer;
-
-    touch-action: manipulation;
-  }
-
-  .menuButton:active {
-    transform: scale(0.97);
-
-    background:
-      rgba(0, 80, 120, 0.8);
-  }
-
-  #gameMessage {
-    position: absolute;
-
-    inset: 0;
-
-    display: none;
-    align-items: center;
-    justify-content: center;
-
-    pointer-events: none;
-
-    z-index: 40;
-  }
-
-  #messageText {
-    padding: 12px 20px;
-
-    border: 1px solid #00aaff;
-
-    color: #00eaff;
-
-    background: rgba(0, 0, 0, 0.7);
-
-    box-shadow: 0 0 12px #00aaff;
-
-    font-weight: bold;
-
-    letter-spacing: 3px;
-  }
-
-  @media (max-width: 480px) {
-    #gameWrapper {
-      width: 94vw;
-      height: 94vw;
-
-      width: min(94vw, 94dvh);
-      height: min(94vw, 94dvh);
-    }
-
-    #startBox,
-    #pauseBox,
-    #gameOverBox {
-      padding: 24px 18px;
-    }
-
-    #musicButton,
-    #pauseButton {
-      width: 38px;
-      height: 38px;
-    }
-  }
 </style>
 </head>
+
 
 <body>
 
@@ -542,21 +584,32 @@
     <div id="stopwatch">00:00.00</div>
   </div>
 
-  <div id="musicButton" aria-label="Toggle music">♪</div>
+  <button id="musicButton" type="button" aria-label="Toggle music">
+    ♪
+  </button>
 
-  <div id="pauseButton" aria-label="Pause game">Ⅱ</div>
+  <button id="pauseButton" type="button" aria-label="Pause game">
+    Ⅱ
+  </button>
 
-  <div id="laserStatus">LASER OFF</div>
+  <div id="laserStatus">
+    LASER OFF
+  </div>
 
-  <div id="enemyStatus">RED TRAIL ON</div>
+  <div id="enemyStatus">
+    RED TRAIL ON
+  </div>
 
-  <!-- START MENU -->
+
+  <!-- START -->
 
   <div id="startMenu">
 
     <div id="startBox">
 
-      <h1 id="tronTitle">TRON</h1>
+      <h1 id="tronTitle">
+        TRON
+      </h1>
 
       <div id="subtitle">
         NEON CYCLES
@@ -565,6 +618,7 @@
       <button
         class="menuButton"
         id="startButton"
+        type="button"
       >
         START GAME
       </button>
@@ -573,17 +627,21 @@
 
   </div>
 
-  <!-- PAUSE MENU -->
+
+  <!-- PAUSE -->
 
   <div id="pauseMenu">
 
     <div id="pauseBox">
 
-      <h2>PAUSED</h2>
+      <h2>
+        PAUSED
+      </h2>
 
       <button
         class="menuButton"
         id="resumeButton"
+        type="button"
       >
         RESUME
       </button>
@@ -591,6 +649,7 @@
       <button
         class="menuButton"
         id="pauseRestartButton"
+        type="button"
       >
         RESTART
       </button>
@@ -598,6 +657,7 @@
       <button
         class="menuButton"
         id="pauseMainMenuButton"
+        type="button"
       >
         MAIN MENU
       </button>
@@ -605,6 +665,7 @@
     </div>
 
   </div>
+
 
   <!-- GAME OVER -->
 
@@ -631,6 +692,7 @@
       <button
         class="menuButton"
         id="gameOverRestartButton"
+        type="button"
       >
         RESTART
       </button>
@@ -638,6 +700,7 @@
       <button
         class="menuButton"
         id="gameOverMainMenuButton"
+        type="button"
       >
         MAIN MENU
       </button>
@@ -646,16 +709,17 @@
 
   </div>
 
-  <div id="gameMessage">
-    <div id="messageText"></div>
-  </div>
-
 </div>
 
-<!-- YOUR EXACT MUSIC FILE -->
+
+<!-- =======================================================
+     YOUR MUSIC
+     Keep background.m4a in the SAME folder as index.html
+     ======================================================= -->
+
 <audio
   id="backgroundMusic"
-  src="background.m4a"
+  src="./background.m4a"
   loop
   preload="auto"
   playsinline
@@ -665,10 +729,8 @@
 <script>
 
 /* =========================================================
-   TRON
+   ELEMENTS
    ========================================================= */
-
-/* ---------------- ELEMENTS ---------------- */
 
 const canvas =
   document.getElementById("gameCanvas");
@@ -676,11 +738,14 @@ const canvas =
 const ctx =
   canvas.getContext("2d");
 
-const pauseButton =
-  document.getElementById("pauseButton");
+const gameWrapper =
+  document.getElementById("gameWrapper");
 
-const musicButton =
-  document.getElementById("musicButton");
+const startMenu =
+  document.getElementById("startMenu");
+
+const startButton =
+  document.getElementById("startButton");
 
 const pauseMenu =
   document.getElementById("pauseMenu");
@@ -694,12 +759,6 @@ const pauseRestartButton =
 const pauseMainMenuButton =
   document.getElementById("pauseMainMenuButton");
 
-const startMenu =
-  document.getElementById("startMenu");
-
-const startButton =
-  document.getElementById("startButton");
-
 const gameOverMenu =
   document.getElementById("gameOverMenu");
 
@@ -709,11 +768,14 @@ const gameOverRestartButton =
 const gameOverMainMenuButton =
   document.getElementById("gameOverMainMenuButton");
 
-const finalTime =
-  document.getElementById("finalTime");
+const pauseButton =
+  document.getElementById("pauseButton");
 
-const deathReason =
-  document.getElementById("deathReason");
+const musicButton =
+  document.getElementById("musicButton");
+
+const backgroundMusic =
+  document.getElementById("backgroundMusic");
 
 const stopwatch =
   document.getElementById("stopwatch");
@@ -724,8 +786,11 @@ const laserStatus =
 const enemyStatus =
   document.getElementById("enemyStatus");
 
-const backgroundMusic =
-  document.getElementById("backgroundMusic");
+const finalTime =
+  document.getElementById("finalTime");
+
+const deathReason =
+  document.getElementById("deathReason");
 
 
 /* =========================================================
@@ -742,18 +807,7 @@ const ENEMY_TRAIL_MIN_TIME = 0.7;
 
 const ENEMY_TRAIL_MAX_TIME = 2.8;
 
-const ENEMY_LOOK_AHEAD = 5.0;
-
-const ENEMY_SIDE_CHECK = 1.1;
-
-
-/*
-   TIMING PHASES
-
-   1:30:00 = 90 minutes
-   2:00:00 = 120 minutes
-   3:00:00 = 180 minutes
-*/
+const ENEMY_LOOK_AHEAD = 5;
 
 const MODE_RED_START =
   90 * 60;
@@ -766,7 +820,7 @@ const MODE_ORANGE_END =
 
 
 /* =========================================================
-   GAME STATE
+   STATE
    ========================================================= */
 
 let canvasSize = 0;
@@ -785,24 +839,23 @@ let laserActive = false;
 
 let playerTrail = [];
 
-let enemyTrailActive = true;
-
 let enemyTrail = [];
+
+let enemyTrailActive = true;
 
 let enemyTrailTimer = 0;
 
+let playerMoveAccumulator = 0;
 
-/* =========================================================
-   MUSIC STATE
-   ========================================================= */
+let enemyMoveAccumulator = 0;
 
 let musicEnabled = true;
 
-let musicWasPlayingBeforePause = false;
+let musicWasPlaying = false;
 
 
 /* =========================================================
-   TOUCH STATE
+   TOUCH
    ========================================================= */
 
 let pointerDown = false;
@@ -821,9 +874,7 @@ let tapTimer = null;
    ========================================================= */
 
 const player = {
-
   x: 3,
-
   y: 12,
 
   dir: {
@@ -836,9 +887,7 @@ const player = {
 
 
 const enemy = {
-
   x: 21,
-
   y: 12,
 
   dir: {
@@ -855,13 +904,13 @@ let lastTime =
 
 
 /* =========================================================
-   RESIZE
+   RESIZE / TRUE CENTERING
    ========================================================= */
 
 function resizeCanvas() {
 
   const rect =
-    canvas.getBoundingClientRect();
+    gameWrapper.getBoundingClientRect();
 
   const size =
     Math.min(
@@ -872,11 +921,13 @@ function resizeCanvas() {
   const dpr =
     window.devicePixelRatio || 1;
 
+
   canvas.width =
     Math.round(size * dpr);
 
   canvas.height =
     Math.round(size * dpr);
+
 
   ctx.setTransform(
     dpr,
@@ -886,6 +937,7 @@ function resizeCanvas() {
     0,
     0
   );
+
 
   canvasSize = size;
 
@@ -905,7 +957,7 @@ window.addEventListener(
   () => {
     setTimeout(
       resizeCanvas,
-      100
+      150
     );
   }
 );
@@ -922,15 +974,13 @@ if (window.visualViewport) {
 
 if ("ResizeObserver" in window) {
 
-  const resizeObserver =
+  const observer =
     new ResizeObserver(
       resizeCanvas
     );
 
-  resizeObserver.observe(
-    document.getElementById(
-      "gameWrapper"
-    )
+  observer.observe(
+    gameWrapper
   );
 }
 
@@ -939,33 +989,7 @@ resizeCanvas();
 
 
 /* =========================================================
-   RANDOM
-   ========================================================= */
-
-function randomRange(min, max) {
-
-  return Math.random() *
-    (max - min) +
-    min;
-}
-
-
-/* =========================================================
-   ENEMY TRAIL TIMER
-   ========================================================= */
-
-function setEnemyTrailTimer() {
-
-  enemyTrailTimer =
-    randomRange(
-      ENEMY_TRAIL_MIN_TIME,
-      ENEMY_TRAIL_MAX_TIME
-    );
-}
-
-
-/* =========================================================
-   GAME MODE
+   MODE
    ========================================================= */
 
 function getGameMode() {
@@ -974,25 +998,21 @@ function getGameMode() {
     survivalTime >= MODE_ORANGE_START &&
     survivalTime < MODE_ORANGE_END
   ) {
-
     return "orange";
   }
+
 
   if (
     survivalTime >= MODE_RED_START &&
     survivalTime < MODE_ORANGE_START
   ) {
-
     return "red";
   }
+
 
   return "normal";
 }
 
-
-/* =========================================================
-   ENEMY VISUALS
-   ========================================================= */
 
 function getEnemyVisuals() {
 
@@ -1003,36 +1023,22 @@ function getEnemyVisuals() {
   if (mode === "orange") {
 
     return {
-
       main: "#ff6a00",
-
       dark: "#2a1000",
-
       trail: "#ff6a00",
-
       label: "ORANGE"
-
     };
   }
 
 
   return {
-
     main: "#ff2222",
-
     dark: "#200000",
-
     trail: "#ff2222",
-
     label: "RED"
-
   };
 }
 
-
-/* =========================================================
-   BACKGROUND MODE
-   ========================================================= */
 
 function updateBackgroundMode() {
 
@@ -1077,7 +1083,215 @@ function updateBackgroundMode() {
 
 
 /* =========================================================
-   RESET GAME
+   MUSIC
+   ========================================================= */
+
+function updateMusicButton() {
+
+  musicButton.textContent =
+    musicEnabled
+      ? "♪"
+      : "♪̸";
+
+  musicButton.style.opacity =
+    musicEnabled
+      ? "1"
+      : "0.45";
+}
+
+
+function playMusic() {
+
+  if (
+    !musicEnabled ||
+    !backgroundMusic
+  ) {
+    return;
+  }
+
+
+  backgroundMusic.volume =
+    0.65;
+
+
+  const promise =
+    backgroundMusic.play();
+
+
+  if (promise) {
+
+    promise.catch(
+      error => {
+
+        /*
+          If the browser blocks playback,
+          don't stop the actual game.
+        */
+
+        console.log(
+          "Music playback was blocked:",
+          error
+        );
+      }
+    );
+  }
+}
+
+
+function pauseMusic() {
+
+  if (
+    !backgroundMusic ||
+    backgroundMusic.paused
+  ) {
+
+    musicWasPlaying = false;
+
+    return;
+  }
+
+
+  musicWasPlaying = true;
+
+  backgroundMusic.pause();
+}
+
+
+function resumeMusic() {
+
+  if (
+    !musicEnabled ||
+    !backgroundMusic
+  ) {
+    return;
+  }
+
+
+  if (musicWasPlaying) {
+
+    playMusic();
+  }
+}
+
+
+function stopMusic() {
+
+  if (!backgroundMusic) {
+    return;
+  }
+
+
+  backgroundMusic.pause();
+
+  backgroundMusic.currentTime = 0;
+
+  musicWasPlaying = false;
+}
+
+
+musicButton.addEventListener(
+  "click",
+  event => {
+
+    event.preventDefault();
+
+    event.stopPropagation();
+
+
+    musicEnabled =
+      !musicEnabled;
+
+
+    updateMusicButton();
+
+
+    if (musicEnabled) {
+
+      if (gameRunning) {
+        playMusic();
+      }
+
+    } else {
+
+      stopMusic();
+    }
+  }
+);
+
+
+/* =========================================================
+   HUD
+   ========================================================= */
+
+function formatTime(seconds) {
+
+  const minutes =
+    Math.floor(
+      seconds / 60
+    );
+
+  const remaining =
+    seconds % 60;
+
+  const whole =
+    Math.floor(
+      remaining
+    );
+
+  const hundredths =
+    Math.floor(
+      (remaining - whole) * 100
+    );
+
+
+  return (
+    String(minutes).padStart(2, "0") +
+    ":" +
+    String(whole).padStart(2, "0") +
+    "." +
+    String(hundredths).padStart(2, "0")
+  );
+}
+
+
+function updateHUD() {
+
+  stopwatch.textContent =
+    formatTime(
+      survivalTime
+    );
+
+
+  laserStatus.textContent =
+    laserActive
+      ? "LASER ACTIVE"
+      : "LASER OFF";
+
+
+  const visuals =
+    getEnemyVisuals();
+
+
+  enemyStatus.textContent =
+    visuals.label +
+    " TRAIL " +
+    (
+      enemyTrailActive
+        ? "ON"
+        : "OFF"
+    );
+
+
+  enemyStatus.style.color =
+    visuals.main;
+
+  enemyStatus.style.textShadow =
+    `0 0 5px ${visuals.main}`;
+}
+
+
+/* =========================================================
+   RESET
    ========================================================= */
 
 function resetGame() {
@@ -1104,11 +1318,6 @@ function resetGame() {
 
   playerTrail = [];
 
-  laserActive = false;
-
-
-  enemyTrailActive = true;
-
   enemyTrail = [
     {
       x: enemy.x,
@@ -1117,10 +1326,24 @@ function resetGame() {
   ];
 
 
-  setEnemyTrailTimer();
+  enemyTrailActive = true;
+
+  enemyTrailTimer =
+    randomRange(
+      ENEMY_TRAIL_MIN_TIME,
+      ENEMY_TRAIL_MAX_TIME
+    );
+
+
+  playerMoveAccumulator = 0;
+
+  enemyMoveAccumulator = 0;
 
 
   survivalTime = 0;
+
+  laserActive = false;
+
 
   gameRunning = true;
 
@@ -1139,19 +1362,6 @@ function resetGame() {
     "none";
 
 
-  tapCount = 0;
-
-
-  if (tapTimer) {
-
-    clearTimeout(
-      tapTimer
-    );
-
-    tapTimer = null;
-  }
-
-
   updateBackgroundMode();
 
   updateHUD();
@@ -1160,6 +1370,44 @@ function resetGame() {
   lastTime =
     performance.now();
 }
+
+
+/* =========================================================
+   RANDOM
+   ========================================================= */
+
+function randomRange(min, max) {
+
+  return Math.random() *
+    (max - min) +
+    min;
+}
+
+
+/* =========================================================
+   START
+   ========================================================= */
+
+/*
+  IMPORTANT:
+  Use CLICK here rather than relying only on pointerdown.
+  This is more reliable across iPhone Safari versions.
+*/
+
+startButton.addEventListener(
+  "click",
+  event => {
+
+    event.preventDefault();
+
+    event.stopPropagation();
+
+
+    resetGame();
+
+    playMusic();
+  }
+);
 
 
 /* =========================================================
@@ -1204,177 +1452,107 @@ function showMainMenu() {
 }
 
 
+pauseMainMenuButton.addEventListener(
+  "click",
+  event => {
+
+    event.preventDefault();
+
+    event.stopPropagation();
+
+    showMainMenu();
+  }
+);
+
+
+gameOverMainMenuButton.addEventListener(
+  "click",
+  event => {
+
+    event.preventDefault();
+
+    event.stopPropagation();
+
+    showMainMenu();
+  }
+);
+
+
 /* =========================================================
-   START GAME
+   PAUSE
    ========================================================= */
 
-function startGame() {
+function pauseGame() {
 
-  resetGame();
+  if (
+    !gameRunning ||
+    gameOver
+  ) {
+    return;
+  }
 
-  startMenu.style.display =
+
+  gameRunning = false;
+
+  pauseMenu.style.display =
+    "flex";
+
+  pauseMusic();
+}
+
+
+function resumeGame() {
+
+  if (
+    gameOver ||
+    !gameStarted
+  ) {
+    return;
+  }
+
+
+  gameRunning = true;
+
+  pauseMenu.style.display =
     "none";
+
 
   lastTime =
     performance.now();
 
-  startMusic();
+
+  resumeMusic();
 }
 
 
-startButton.addEventListener(
-  "pointerdown",
+pauseButton.addEventListener(
+  "click",
   event => {
 
     event.preventDefault();
 
     event.stopPropagation();
 
-    startGame();
+    pauseGame();
   }
 );
 
 
-/* =========================================================
-   MUSIC
-   ========================================================= */
+resumeButton.addEventListener(
+  "click",
+  event => {
 
-function updateMusicButton() {
+    event.preventDefault();
 
-  musicButton.textContent =
-    musicEnabled
-      ? "♪"
-      : "♪̸";
+    event.stopPropagation();
 
-  musicButton.style.opacity =
-    musicEnabled
-      ? "1"
-      : "0.5";
-}
-
-
-/* Start your exact background.m4a file */
-
-function startMusic() {
-
-  if (!musicEnabled) {
-    return;
+    resumeGame();
   }
+);
 
 
-  if (!backgroundMusic) {
-    return;
-  }
-
-
-  backgroundMusic.volume =
-    0.65;
-
-
-  const playPromise =
-    backgroundMusic.play();
-
-
-  if (
-    playPromise &&
-    typeof playPromise.catch === "function"
-  ) {
-
-    playPromise.catch(
-      () => {
-        /*
-          iPhone/Safari may block playback
-          until a user gesture.
-
-          START GAME itself is a user gesture,
-          so this normally succeeds.
-        */
-      }
-    );
-  }
-}
-
-
-/* Pause only the music */
-
-function pauseMusic() {
-
-  if (!backgroundMusic) {
-    return;
-  }
-
-  if (!backgroundMusic.paused) {
-
-    musicWasPlayingBeforePause =
-      true;
-
-    backgroundMusic.pause();
-
-  } else {
-
-    musicWasPlayingBeforePause =
-      false;
-  }
-}
-
-
-/* Resume music */
-
-function resumeMusic() {
-
-  if (
-    !musicEnabled ||
-    !backgroundMusic
-  ) {
-
-    return;
-  }
-
-
-  if (
-    musicWasPlayingBeforePause ||
-    backgroundMusic.currentTime > 0
-  ) {
-
-    const playPromise =
-      backgroundMusic.play();
-
-
-    if (
-      playPromise &&
-      typeof playPromise.catch === "function"
-    ) {
-
-      playPromise.catch(
-        () => {}
-      );
-    }
-  }
-}
-
-
-/* Stop music completely */
-
-function stopMusic() {
-
-  if (!backgroundMusic) {
-    return;
-  }
-
-
-  backgroundMusic.pause();
-
-  backgroundMusic.currentTime = 0;
-
-  musicWasPlayingBeforePause =
-    false;
-}
-
-
-/* Music button */
-
-musicButton.addEventListener(
-  "pointerdown",
+pauseRestartButton.addEventListener(
+  "click",
   event => {
 
     event.preventDefault();
@@ -1382,138 +1560,11 @@ musicButton.addEventListener(
     event.stopPropagation();
 
 
-    musicEnabled =
-      !musicEnabled;
+    resetGame();
 
-
-    updateMusicButton();
-
-
-    if (musicEnabled) {
-
-      if (gameRunning) {
-
-        startMusic();
-      }
-
-    } else {
-
-      stopMusic();
-    }
+    playMusic();
   }
 );
-
-
-updateMusicButton();
-
-
-/* =========================================================
-   HUD
-   ========================================================= */
-
-function formatTime(seconds) {
-
-  const minutes =
-    Math.floor(
-      seconds / 60
-    );
-
-  const remainingSeconds =
-    seconds % 60;
-
-  const wholeSeconds =
-    Math.floor(
-      remainingSeconds
-    );
-
-  const hundredths =
-    Math.floor(
-      (remainingSeconds -
-        wholeSeconds) *
-        100
-    );
-
-
-  return (
-    String(minutes).padStart(
-      2,
-      "0"
-    ) +
-    ":" +
-    String(wholeSeconds).padStart(
-      2,
-      "0"
-    ) +
-    "." +
-    String(hundredths).padStart(
-      2,
-      "0"
-    )
-  );
-}
-
-
-function updateHUD() {
-
-  stopwatch.textContent =
-    formatTime(
-      survivalTime
-    );
-
-
-  laserStatus.textContent =
-    laserActive
-      ? "LASER ACTIVE"
-      : "LASER OFF";
-
-
-  const visuals =
-    getEnemyVisuals();
-
-
-  enemyStatus.textContent =
-    visuals.label +
-    " TRAIL " +
-    (
-      enemyTrailActive
-        ? "ON"
-        : "OFF"
-    );
-
-
-  enemyStatus.style.color =
-    visuals.main;
-
-
-  enemyStatus.style.textShadow =
-    `0 0 5px ${visuals.main}`;
-}
-
-
-/* =========================================================
-   DIRECTION
-   ========================================================= */
-
-function setPlayerDirection(x, y) {
-
-  /*
-    Prevent instant 180-degree turns.
-  */
-
-  if (
-    x === -player.dir.x &&
-    y === -player.dir.y
-  ) {
-
-    return;
-  }
-
-
-  player.dir = {
-    x,
-    y
-  };
-}
 
 
 /* =========================================================
@@ -1596,8 +1647,6 @@ window.addEventListener(
 
       toggleLaser();
 
-      event.preventDefault();
-
       return;
     }
 
@@ -1613,7 +1662,7 @@ window.addEventListener(
       if (musicEnabled) {
 
         if (gameRunning) {
-          startMusic();
+          playMusic();
         }
 
       } else {
@@ -1621,24 +1670,25 @@ window.addEventListener(
         stopMusic();
       }
 
-      event.preventDefault();
-
       return;
     }
 
 
     if (
-      key === " " ||
-      key === "p"
+      key === "p" ||
+      key === " "
     ) {
 
-      if (gameStarted) {
+      if (gameRunning) {
 
-        if (gameRunning) {
-          pauseGame();
-        } else if (!gameOver) {
-          resumeGame();
-        }
+        pauseGame();
+
+      } else if (
+        gameStarted &&
+        !gameOver
+      ) {
+
+        resumeGame();
       }
 
       event.preventDefault();
@@ -1652,12 +1702,34 @@ window.addEventListener(
       !gameStarted
     ) {
 
-      startGame();
+      resetGame();
 
-      event.preventDefault();
+      playMusic();
     }
   }
 );
+
+
+/* =========================================================
+   PLAYER DIRECTION
+   ========================================================= */
+
+function setPlayerDirection(x, y) {
+
+  if (
+    x === -player.dir.x &&
+    y === -player.dir.y
+  ) {
+
+    return;
+  }
+
+
+  player.dir = {
+    x,
+    y
+  };
+}
 
 
 /* =========================================================
@@ -1787,37 +1859,17 @@ canvas.addEventListener(
       Math.abs(dy)
     ) {
 
-      if (dx > 0) {
-
-        setPlayerDirection(
-          1,
-          0
-        );
-
-      } else {
-
-        setPlayerDirection(
-          -1,
-          0
-        );
-      }
+      setPlayerDirection(
+        dx > 0 ? 1 : -1,
+        0
+      );
 
     } else {
 
-      if (dy > 0) {
-
-        setPlayerDirection(
-          0,
-          1
-        );
-
-      } else {
-
-        setPlayerDirection(
-          0,
-          -1
-        );
-      }
+      setPlayerDirection(
+        0,
+        dy > 0 ? 1 : -1
+      );
     }
   }
 );
@@ -1833,188 +1885,7 @@ canvas.addEventListener(
 
 
 /* =========================================================
-   PAUSE
-   ========================================================= */
-
-function pauseGame() {
-
-  if (
-    !gameRunning ||
-    gameOver
-  ) {
-
-    return;
-  }
-
-
-  gameRunning = false;
-
-  pauseMenu.style.display =
-    "flex";
-
-  pauseMusic();
-}
-
-
-function resumeGame() {
-
-  if (
-    gameOver ||
-    !gameStarted
-  ) {
-
-    return;
-  }
-
-
-  gameRunning = true;
-
-  pauseMenu.style.display =
-    "none";
-
-
-  lastTime =
-    performance.now();
-
-
-  resumeMusic();
-}
-
-
-pauseButton.addEventListener(
-  "pointerdown",
-  event => {
-
-    event.preventDefault();
-
-    event.stopPropagation();
-
-    pauseGame();
-  }
-);
-
-
-resumeButton.addEventListener(
-  "pointerdown",
-  event => {
-
-    event.preventDefault();
-
-    event.stopPropagation();
-
-    resumeGame();
-  }
-);
-
-
-/* =========================================================
-   RESTART FROM PAUSE
-   ========================================================= */
-
-pauseRestartButton.addEventListener(
-  "pointerdown",
-  event => {
-
-    event.preventDefault();
-
-    event.stopPropagation();
-
-    resetGame();
-
-    startMusic();
-  }
-);
-
-
-/* =========================================================
-   MAIN MENU FROM PAUSE
-   ========================================================= */
-
-pauseMainMenuButton.addEventListener(
-  "pointerdown",
-  event => {
-
-    event.preventDefault();
-
-    event.stopPropagation();
-
-    showMainMenu();
-  }
-);
-
-
-/* =========================================================
-   GAME OVER
-   ========================================================= */
-
-function triggerGameOver(reason) {
-
-  if (gameOver) {
-    return;
-  }
-
-
-  gameRunning = false;
-
-  gameOver = true;
-
-
-  deathReason.textContent =
-    reason;
-
-
-  finalTime.textContent =
-    formatTime(
-      survivalTime
-    );
-
-
-  gameOverMenu.style.display =
-    "flex";
-
-
-  stopMusic();
-}
-
-
-/* =========================================================
-   GAME OVER RESTART
-   ========================================================= */
-
-gameOverRestartButton.addEventListener(
-  "pointerdown",
-  event => {
-
-    event.preventDefault();
-
-    event.stopPropagation();
-
-    resetGame();
-
-    startMusic();
-  }
-);
-
-
-/* =========================================================
-   GAME OVER MAIN MENU
-   ========================================================= */
-
-gameOverMainMenuButton.addEventListener(
-  "pointerdown",
-  event => {
-
-    event.preventDefault();
-
-    event.stopPropagation();
-
-    showMainMenu();
-  }
-);
-
-
-/* =========================================================
-   COLLISION
+   COLLISION HELPERS
    ========================================================= */
 
 function isOutside(x, y) {
@@ -2024,15 +1895,6 @@ function isOutside(x, y) {
     x >= GRID_SIZE ||
     y < 0 ||
     y >= GRID_SIZE
-  );
-}
-
-
-function samePosition(a, b) {
-
-  return (
-    a.x === b.x &&
-    a.y === b.y
   );
 }
 
@@ -2069,28 +1931,23 @@ function getDirectionOptions() {
     enemy.dir;
 
 
-  const forward = {
-    x: current.x,
-    y: current.y
-  };
-
-
-  const left = {
-    x: current.y,
-    y: -current.x
-  };
-
-
-  const right = {
-    x: -current.y,
-    y: current.x
-  };
-
-
   return [
-    forward,
-    left,
-    right
+
+    {
+      x: current.x,
+      y: current.y
+    },
+
+    {
+      x: current.y,
+      y: -current.x
+    },
+
+    {
+      x: -current.y,
+      y: current.x
+    }
+
   ];
 }
 
@@ -2100,7 +1957,6 @@ function isDangerousCell(x, y) {
   if (
     isOutside(x, y)
   ) {
-
     return true;
   }
 
@@ -2112,7 +1968,6 @@ function isDangerousCell(x, y) {
       playerTrail
     )
   ) {
-
     return true;
   }
 
@@ -2125,7 +1980,6 @@ function isDangerousCell(x, y) {
       enemyTrail
     )
   ) {
-
     return true;
   }
 
@@ -2139,7 +1993,6 @@ function directionSafety(direction) {
   let x = enemy.x;
 
   let y = enemy.y;
-
 
   let safety = 0;
 
@@ -2161,7 +2014,6 @@ function directionSafety(direction) {
         y
       )
     ) {
-
       break;
     }
 
@@ -2182,7 +2034,6 @@ function updateEnemyAI() {
 
   let bestDirection =
     options[0];
-
 
   let bestScore =
     -Infinity;
@@ -2207,11 +2058,6 @@ function updateEnemyAI() {
     let score =
       safety * 10;
 
-
-    /*
-      Slightly favor moving toward
-      the player when safe.
-    */
 
     const testX =
       enemy.x +
@@ -2264,84 +2110,8 @@ function updateEnemyAI() {
 
 
 /* =========================================================
-   UPDATE
+   MOVEMENT
    ========================================================= */
-
-function update(dt) {
-
-  if (
-    !gameRunning ||
-    gameOver
-  ) {
-
-    return;
-  }
-
-
-  survivalTime += dt;
-
-
-  updateBackgroundMode();
-
-  updateHUD();
-
-
-  /* ---------------- ENEMY TRAIL ---------------- */
-
-  enemyTrailTimer -= dt;
-
-
-  if (
-    enemyTrailTimer <= 0
-  ) {
-
-    enemyTrailActive =
-      !enemyTrailActive;
-
-    setEnemyTrailTimer();
-
-    updateHUD();
-  }
-
-
-  /* ---------------- PLAYER MOVEMENT ---------------- */
-
-  const playerMoveAmount =
-    player.speed * dt;
-
-
-  const playerSteps =
-    Math.max(
-      1,
-      Math.floor(
-        playerMoveAmount
-      )
-    );
-
-
-  /*
-    The game is grid based.
-    Accumulate movement through
-    a simple timer system.
-  */
-
-  movePlayer(dt);
-
-
-  /* ---------------- ENEMY MOVEMENT ---------------- */
-
-  moveEnemy(dt);
-}
-
-
-/* =========================================================
-   MOVEMENT ACCUMULATORS
-   ========================================================= */
-
-let playerMoveAccumulator = 0;
-
-let enemyMoveAccumulator = 0;
-
 
 function movePlayer(dt) {
 
@@ -2406,7 +2176,7 @@ function movePlayer(dt) {
     ) {
 
       triggerGameOver(
-        "YOU HIT THE RED TRAIL!"
+        "YOU HIT THE ENEMY TRAIL!"
       );
 
       return;
@@ -2457,11 +2227,11 @@ function moveEnemy(dt) {
     updateEnemyAI();
 
 
-    const nextX =
+    let nextX =
       enemy.x +
       enemy.dir.x;
 
-    const nextY =
+    let nextY =
       enemy.y +
       enemy.dir.y;
 
@@ -2470,19 +2240,18 @@ function moveEnemy(dt) {
       isOutside(
         nextX,
         nextY
+      ) ||
+      isDangerousCell(
+        nextX,
+        nextY
       )
     ) {
-
-      /*
-        Try another direction.
-      */
 
       const options =
         getDirectionOptions();
 
 
-      let found =
-        false;
+      let found = false;
 
 
       for (
@@ -2516,6 +2285,11 @@ function moveEnemy(dt) {
             y: option.y
           };
 
+
+          nextX = testX;
+
+          nextY = testY;
+
           found = true;
 
           break;
@@ -2531,56 +2305,8 @@ function moveEnemy(dt) {
 
         return;
       }
-
-
-      continue;
     }
 
-
-    /*
-      Enemy hits player's trail.
-    */
-
-    if (
-      hitsTrail(
-        nextX,
-        nextY,
-        playerTrail
-      )
-    ) {
-
-      triggerGameOver(
-        "THE ENEMY CRASHED!"
-      );
-
-      return;
-    }
-
-
-    /*
-      Enemy hits its own trail.
-    */
-
-    if (
-      enemyTrailActive &&
-      hitsTrail(
-        nextX,
-        nextY,
-        enemyTrail
-      )
-    ) {
-
-      triggerGameOver(
-        "THE ENEMY CRASHED!"
-      );
-
-      return;
-    }
-
-
-    /*
-      Enemy hits player.
-    */
 
     if (
       nextX === player.x &&
@@ -2614,7 +2340,55 @@ function moveEnemy(dt) {
 
 
 /* =========================================================
-   DRAW GLOW LINE
+   UPDATE
+   ========================================================= */
+
+function update(dt) {
+
+  if (
+    !gameRunning ||
+    gameOver
+  ) {
+    return;
+  }
+
+
+  survivalTime += dt;
+
+
+  updateBackgroundMode();
+
+
+  enemyTrailTimer -= dt;
+
+
+  if (
+    enemyTrailTimer <= 0
+  ) {
+
+    enemyTrailActive =
+      !enemyTrailActive;
+
+
+    enemyTrailTimer =
+      randomRange(
+        ENEMY_TRAIL_MIN_TIME,
+        ENEMY_TRAIL_MAX_TIME
+      );
+  }
+
+
+  movePlayer(dt);
+
+  moveEnemy(dt);
+
+
+  updateHUD();
+}
+
+
+/* =========================================================
+   DRAW TRAIL
    ========================================================= */
 
 function drawTrail(
@@ -2626,7 +2400,6 @@ function drawTrail(
   if (
     trail.length === 0
   ) {
-
     return;
   }
 
@@ -2645,7 +2418,6 @@ function drawTrail(
 
   ctx.lineJoin =
     "round";
-
 
   ctx.shadowColor =
     color;
@@ -2667,12 +2439,12 @@ function drawTrail(
       trail[i];
 
 
-    const px =
+    const x =
       point.x *
       cellSize +
       cellSize / 2;
 
-    const py =
+    const y =
       point.y *
       cellSize +
       cellSize / 2;
@@ -2681,22 +2453,21 @@ function drawTrail(
     if (i === 0) {
 
       ctx.moveTo(
-        px,
-        py
+        x,
+        y
       );
 
     } else {
 
       ctx.lineTo(
-        px,
-        py
+        x,
+        y
       );
     }
   }
 
 
   ctx.stroke();
-
 
   ctx.restore();
 }
@@ -2737,10 +2508,6 @@ function drawCycle(
   );
 
 
-  /*
-    Direction rotation
-  */
-
   let angle = 0;
 
 
@@ -2775,16 +2542,11 @@ function drawCycle(
   ctx.rotate(angle);
 
 
-  /*
-    Outer glow
-  */
-
   ctx.shadowColor =
     mainColor;
 
   ctx.shadowBlur =
     18;
-
 
   ctx.fillStyle =
     mainColor;
@@ -2803,12 +2565,7 @@ function drawCycle(
   ctx.fill();
 
 
-  /*
-    Dark center
-  */
-
-  ctx.shadowBlur =
-    0;
+  ctx.shadowBlur = 0;
 
   ctx.fillStyle =
     darkColor;
@@ -2826,10 +2583,6 @@ function drawCycle(
 
   ctx.fill();
 
-
-  /*
-    Front light
-  */
 
   ctx.fillStyle =
     mainColor;
@@ -2857,10 +2610,6 @@ function drawCycle(
   ctx.fill();
 
 
-  /*
-    Player laser indicator
-  */
-
   if (
     isPlayer &&
     laserActive
@@ -2869,8 +2618,7 @@ function drawCycle(
     ctx.strokeStyle =
       "#00ffff";
 
-    ctx.lineWidth =
-      2;
+    ctx.lineWidth = 2;
 
     ctx.shadowColor =
       "#00ffff";
@@ -2908,7 +2656,6 @@ function draw() {
   if (
     canvasSize <= 0
   ) {
-
     return;
   }
 
@@ -2924,8 +2671,6 @@ function draw() {
   const mode =
     getGameMode();
 
-
-  /* ---------------- GRID ---------------- */
 
   let gridColor =
     "rgba(0, 170, 255, 0.055)";
@@ -2947,12 +2692,10 @@ function draw() {
 
   ctx.save();
 
-
   ctx.strokeStyle =
     gridColor;
 
-  ctx.lineWidth =
-    1;
+  ctx.lineWidth = 1;
 
 
   for (
@@ -2999,7 +2742,7 @@ function draw() {
   ctx.restore();
 
 
-  /* ---------------- PLAYER TRAIL ---------------- */
+  /* Player trail */
 
   drawTrail(
     playerTrail,
@@ -3008,15 +2751,13 @@ function draw() {
   );
 
 
-  /* ---------------- ENEMY TRAIL ---------------- */
+  /* Enemy trail */
 
   const enemyVisuals =
     getEnemyVisuals();
 
 
-  if (
-    enemyTrailActive
-  ) {
+  if (enemyTrailActive) {
 
     drawTrail(
       enemyTrail,
@@ -3026,7 +2767,7 @@ function draw() {
   }
 
 
-  /* ---------------- CYCLES ---------------- */
+  /* Cycles */
 
   drawCycle(
     player,
@@ -3046,6 +2787,56 @@ function draw() {
 
 
 /* =========================================================
+   GAME OVER
+   ========================================================= */
+
+function triggerGameOver(reason) {
+
+  if (gameOver) {
+    return;
+  }
+
+
+  gameRunning = false;
+
+  gameOver = true;
+
+
+  deathReason.textContent =
+    reason;
+
+
+  finalTime.textContent =
+    formatTime(
+      survivalTime
+    );
+
+
+  gameOverMenu.style.display =
+    "flex";
+
+
+  stopMusic();
+}
+
+
+gameOverRestartButton.addEventListener(
+  "click",
+  event => {
+
+    event.preventDefault();
+
+    event.stopPropagation();
+
+
+    resetGame();
+
+    playMusic();
+  }
+);
+
+
+/* =========================================================
    GAME LOOP
    ========================================================= */
 
@@ -3058,8 +2849,7 @@ function gameLoop(now) {
     );
 
 
-  lastTime =
-    now;
+  lastTime = now;
 
 
   update(dt);
@@ -3073,48 +2863,46 @@ function gameLoop(now) {
 }
 
 
+/* =========================================================
+   INITIALIZE
+   ========================================================= */
+
+updateMusicButton();
+
+updateHUD();
+
+showMainMenu();
+
+resizeCanvas();
+
 requestAnimationFrame(
   gameLoop
 );
 
 
 /* =========================================================
-   INITIAL STATE
-   ========================================================= */
-
-showMainMenu();
-
-updateHUD();
-
-updateMusicButton();
-
-
-/* =========================================================
-   PREVENT PAGE SCROLL / ZOOM
+   PREVENT PAGE GESTURES
    ========================================================= */
 
 document.addEventListener(
-  "touchmove",
+  "gesturestart",
   event => {
-
     event.preventDefault();
-
   },
   {
     passive: false
   }
 );
 
-
 document.addEventListener(
-  "gesturestart",
+  "gesturechange",
   event => {
-
     event.preventDefault();
-
+  },
+  {
+    passive: false
   }
 );
-
 
 </script>
 
