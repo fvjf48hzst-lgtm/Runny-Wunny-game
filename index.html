@@ -1046,13 +1046,36 @@ const backgroundMusic =
         "backgroundMusic"
     );
 
-function playBackgroundMusic() {
+function startBackgroundMusic() {
+
+    backgroundMusic.currentTime = 0;
 
     backgroundMusic
         .play()
         .catch(
             () => {}
         );
+}
+
+function pauseBackgroundMusic() {
+
+    backgroundMusic.pause();
+}
+
+function resumeBackgroundMusic() {
+
+    backgroundMusic
+        .play()
+        .catch(
+            () => {}
+        );
+}
+
+function stopBackgroundMusic() {
+
+    backgroundMusic.pause();
+
+    backgroundMusic.currentTime = 0;
 }
 
 const GRID_SIZE = 25;
@@ -1309,7 +1332,7 @@ function resetGame() {
     lastTime =
         performance.now();
 
-    playBackgroundMusic();
+    startBackgroundMusic();
 }
 
 function showMainMenu() {
@@ -1347,6 +1370,8 @@ function showMainMenu() {
 
     survivalTime = 0;
 
+    stopBackgroundMusic();
+
     updateHUD();
 }
 
@@ -1359,8 +1384,6 @@ function startGame() {
 
     lastTime =
         performance.now();
-
-    playBackgroundMusic();
 }
 
 startButton.addEventListener(
@@ -2748,6 +2771,8 @@ function togglePause() {
         pauseMenu.style.display =
             "flex";
 
+        pauseBackgroundMusic();
+
     } else {
 
         gameRunning = true;
@@ -2757,6 +2782,8 @@ function togglePause() {
 
         lastTime =
             performance.now();
+
+        resumeBackgroundMusic();
     }
 }
 
@@ -2804,6 +2831,8 @@ resumeButton.addEventListener(
 
             lastTime =
                 performance.now();
+
+            resumeBackgroundMusic();
         }
 
     }
