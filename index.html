@@ -1385,13 +1385,6 @@ function updateHUD() {
             "0"
         );
 
-    /*
-        Enemy colors:
-        0:00 - 2:00       = RED
-        2:00 - 2:15       = ORANGE
-        2:15+             = YELLOW
-    */
-
     if (
         survivalTime >= 135
     ) {
@@ -1446,16 +1439,6 @@ function updateHUD() {
             ? "LASER ACTIVE"
             : "LASER OFF";
 }
-
-/* =========================================================
-   BACKGROUND / COLOR MODE
-
-   0:00 - 0:59.99  = BLUE
-   1:00 - 1:29.99  = RED
-   1:30 - 1:59.99  = BLUE
-   2:00 - 2:14.99  = ORANGE
-   2:15+            = BLUE
-   ========================================================= */
 
 function updateBackgroundMode() {
 
@@ -1989,6 +1972,10 @@ function countOpenDirections(
     return open;
 }
 
+/* =========================================================
+   SMART / UNPREDICTABLE ENEMY AI
+   ========================================================= */
+
 function enemyAI() {
 
     const directions = [
@@ -2002,6 +1989,185 @@ function enemyAI() {
         { x: 0, y: -1 }
 
     ];
+
+    function measureSpace(
+        startX,
+        startY,
+        direction,
+        maxDistance
+    ) {
+
+        let space = 0;
+
+        const step = 0.5;
+
+        for (
+            let distance = 0.5;
+            distance <= maxDistance;
+            distance += step
+        ) {
+
+            const x =
+                startX +
+                direction.x *
+                distance;
+
+            const y =
+                startY +
+                direction.y *
+                distance;
+
+            if (
+                x < 0.5 ||
+                x > GRID_SIZE - 0.5 ||
+                y < 0.5 ||
+                y > GRID_SIZE - 0.5
+            ) {
+
+                break;
+            }
+
+            if (
+                isPositionDangerous(
+                    x,
+                    y
+                )
+            ) {
+
+                break;
+            }
+
+            space += step;
+        }
+
+        return space;
+    }
+
+    function measureFutureSpace(
+        direction
+    ) {
+
+        const futureX =
+            enemy.x +
+            direction.x * 3;
+
+        const futureY =
+            enemy.y +
+            direction.y * 3;
+
+        if (
+            futureX < 0 ||
+            futureX >= GRID_SIZE ||
+            futureY < 0 ||
+            futureY >= GRID_SIZE
+        ) {
+
+            return 0;
+        }
+
+        let total = 0;
+
+        const surroundingDirections = [
+
+            { x: 1, y: 0 },
+
+            { x: -1, y: 0 },
+
+            { x: 0, y: 1 },
+
+            { x: 0, y: -1 }
+
+        ];
+
+        for (
+            const d of surroundingDirections
+        ) {
+
+            total +=
+                measureSpace(
+                    futureX,
+                    futureY,
+                    d,
+                    5
+                );
+        }
+
+        return total;
+    }
+
+    function corridorPenalty(
+        direction
+    ) {
+
+        let penalty = 0;
+
+        for (
+            let distance = 1;
+            distance <= 5;
+            distance += 0.5
+        ) {
+
+            const x =
+                enemy.x +
+                direction.x *
+                distance;
+
+            const y =
+                enemy.y +
+                direction.y *
+                distance;
+
+            if (
+                x < 0.5 ||
+                x > GRID_SIZE - 0.5 ||
+                y < 0.5 ||
+                y > GRID_SIZE - 0.5
+            ) {
+
+                penalty += 12;
+
+                break;
+            }
+
+            const sideA = {
+
+                x: -direction.y,
+
+                y: direction.x
+
+            };
+
+            const sideB = {
+
+                x: direction.y,
+
+                y: -direction.x
+
+            };
+
+            const blockedA =
+                isPositionDangerous(
+                    x + sideA.x,
+                    y + sideA.y
+                );
+
+            const blockedB =
+                isPositionDangerous(
+                    x + sideB.x,
+                    y + sideB.y
+                );
+
+            if (
+                blockedA &&
+                blockedB
+            ) {
+
+                penalty += 5;
+            }
+        }
+
+        return penalty;
+    }
 
     const candidates = [];
 
@@ -2017,275 +2183,316 @@ function enemyAI() {
             continue;
         }
 
-        if (
-            directionHasDanger(
+        const immediateSpace =
+            measureSpace(
+                enemy.x,
+                enemy.y,
                 direction,
-                ENEMY_LOOK_AHEAD
-            )
+                7
+            );
+
+        if (
+            immediateSpace < 1.5
         ) {
 
             continue;
         }
 
-        let sideDanger = false;
-
-        const sideX =
-            -direction.y *
-            ENEMY_SIDE_CHECK;
-
-        const sideY =
-            direction.x *
-            ENEMY_SIDE_CHECK;
-
-        for (
-            let distance = 1;
-            distance <= 4;
-            distance++
-        ) {
-
-            const forwardX =
-                enemy.x +
-                direction.x *
-                distance;
-
-            const forwardY =
-                enemy.y +
-                direction.y *
-                distance;
-
-            if (
-
-                isPositionDangerous(
-                    forwardX + sideX,
-                    forwardY + sideY
-                )
-
-                ||
-
-                isPositionDangerous(
-                    forwardX - sideX,
-                    forwardY - sideY
-                )
-
-            ) {
-
-                sideDanger = true;
-
-                break;
-            }
-        }
-
         let score = 0;
 
-        if (
-            direction.x === enemy.dir.x &&
-            direction.y === enemy.dir.y
-        ) {
+        score +=
+            immediateSpace * 8;
 
-            score += 8;
-        }
-
-        const openSpace =
-            countOpenDirections(
-                enemy.x +
-                direction.x * 2,
-
-                enemy.y +
-                direction.y * 2
+        const futureSpace =
+            measureFutureSpace(
+                direction
             );
 
         score +=
-            openSpace * 5;
+            futureSpace * 2.2;
 
-        if (sideDanger) {
-
-            score -= 10;
-        }
-
-        for (
-            let distance = 1;
-            distance <= 4;
-            distance++
-        ) {
-
-            const checkX =
-                enemy.x +
-                direction.x *
-                distance;
-
-            const checkY =
-                enemy.y +
-                direction.y *
-                distance;
-
-            if (
-                isPositionDangerous(
-                    checkX,
-                    checkY
-                )
-            ) {
-
-                score -= 100;
-            }
-        }
-
-        const futureX =
+        const projectedX =
             enemy.x +
-            direction.x * 5;
+            direction.x * 3;
 
-        const futureY =
+        const projectedY =
             enemy.y +
-            direction.y * 5;
+            direction.y * 3;
 
-        const distanceToPlayer =
+        const wallDistance =
+            Math.min(
+                projectedX,
+                GRID_SIZE - projectedX,
+                projectedY,
+                GRID_SIZE - projectedY
+            );
+
+        score +=
+            Math.min(
+                wallDistance,
+                5
+            ) * 1.8;
+
+        score -=
+            corridorPenalty(
+                direction
+            );
+
+        const futurePlayerDistance =
 
             Math.abs(
-                futureX - player.x
+                projectedX -
+                player.x
             )
 
             +
 
             Math.abs(
-                futureY - player.y
+                projectedY -
+                player.y
             );
 
         score +=
 
             Math.max(
                 0,
-                12 - distanceToPlayer
+                14 -
+                futurePlayerDistance
             )
 
-            * 0.35;
+            * 0.75;
+
+        const crossProduct =
+
+            direction.x *
+                (
+                    player.y -
+                    enemy.y
+                )
+
+            -
+
+            direction.y *
+                (
+                    player.x -
+                    enemy.x
+                );
+
+        score +=
+            Math.abs(
+                crossProduct
+            ) * 0.08;
+
+        if (
+            direction.x === enemy.dir.x &&
+            direction.y === enemy.dir.y
+        ) {
+
+            score += 2;
+
+        } else {
+
+            score += 1.5;
+        }
+
+        /*
+            Randomness is intentionally strong enough
+            to prevent the enemy from repeatedly making
+            the exact same decision in the same situation.
+        */
+
+        score +=
+            randomRange(
+                -7,
+                7
+            );
+
+        /*
+            Occasionally favor a different viable
+            direction so the AI does not become
+            completely predictable.
+        */
+
+        if (
+            Math.random() < 0.14 &&
+            immediateSpace >= 3
+        ) {
+
+            score +=
+                randomRange(
+                    4,
+                    12
+                );
+        }
 
         candidates.push({
 
             direction,
 
-            score
+            score,
+
+            immediateSpace,
+
+            futureSpace
 
         });
     }
 
+    /*
+        If every normal option is blocked,
+        find the direction with the most
+        immediate breathing room.
+    */
+
     if (
-        candidates.length > 0
+        candidates.length === 0
     ) {
 
-        candidates.sort(
-            (a, b) =>
-                b.score - a.score
-        );
+        let emergencyDirection = null;
 
-        const bestScore =
-            candidates[0].score;
+        let emergencySpace = -1;
 
-        const goodChoices =
-            candidates.filter(
-                candidate =>
-                    candidate.score >=
-                    bestScore - 4
-            );
+        for (
+            const direction of directions
+        ) {
 
-        const choice =
-            goodChoices[
-                Math.floor(
-                    Math.random() *
-                    goodChoices.length
-                )
-            ];
+            if (
+                direction.x === -enemy.dir.x &&
+                direction.y === -enemy.dir.y
+            ) {
 
-        enemy.dir =
-            choice.direction;
+                continue;
+            }
+
+            const space =
+                measureSpace(
+                    enemy.x,
+                    enemy.y,
+                    direction,
+                    4
+                );
+
+            if (
+                space >
+                emergencySpace
+            ) {
+
+                emergencySpace =
+                    space;
+
+                emergencyDirection =
+                    direction;
+            }
+        }
+
+        if (
+            emergencyDirection
+        ) {
+
+            enemy.dir =
+                emergencyDirection;
+        }
 
         return;
     }
 
-    let emergencyChoice = null;
+    candidates.sort(
+        (a, b) =>
+            b.score -
+            a.score
+    );
 
-    let emergencyScore =
-        -Infinity;
+    const bestScore =
+        candidates[0].score;
 
-    for (
-        const direction of directions
+    /*
+        Do not always take the mathematically
+        best direction.
+
+        Any direction reasonably close to the
+        best score can be selected, which makes
+        the enemy behave differently from game
+        to game even in similar situations.
+    */
+
+    const viableChoices =
+        candidates.filter(
+            candidate =>
+
+                candidate.score >=
+                bestScore - 9
+
+                &&
+
+                candidate.immediateSpace >= 2
+        );
+
+    if (
+        viableChoices.length > 0
     ) {
 
-        if (
-            direction.x === -enemy.dir.x &&
-            direction.y === -enemy.dir.y
-        ) {
-
-            continue;
-        }
-
-        let score = 0;
+        let totalWeight = 0;
 
         for (
-            let distance = 0.5;
-            distance <= 3;
-            distance += 0.5
+            const choice of viableChoices
         ) {
 
-            const x =
-                enemy.x +
-                direction.x *
-                distance;
+            const difference =
+                bestScore -
+                choice.score;
 
-            const y =
-                enemy.y +
-                direction.y *
-                distance;
+            const weight =
+                Math.max(
+                    0.25,
+                    10 -
+                    difference
+                );
+
+            choice.weight =
+                weight;
+
+            totalWeight +=
+                weight;
+        }
+
+        let roll =
+            Math.random() *
+            totalWeight;
+
+        for (
+            const choice of viableChoices
+        ) {
+
+            roll -=
+                choice.weight;
 
             if (
-
-                x < 0.5 ||
-
-                x > GRID_SIZE - 0.5 ||
-
-                y < 0.5 ||
-
-                y > GRID_SIZE - 0.5
-
+                roll <= 0
             ) {
 
-                score -= 20;
+                enemy.dir =
+                    choice.direction;
 
-            }
-
-            else if (
-                isPositionDangerous(
-                    x,
-                    y
-                )
-            ) {
-
-                score -= 15;
-
-            }
-
-            else {
-
-                score += 3;
+                return;
             }
         }
-
-        if (
-            score >
-            emergencyScore
-        ) {
-
-            emergencyScore =
-                score;
-
-            emergencyChoice =
-                direction;
-        }
-    }
-
-    if (emergencyChoice) {
 
         enemy.dir =
-            emergencyChoice;
+            viableChoices[
+                viableChoices.length - 1
+            ].direction;
+
+        return;
     }
+
+    candidates.sort(
+        (a, b) =>
+            b.immediateSpace -
+            a.immediateSpace
+    );
+
+    enemy.dir =
+        candidates[0].direction;
 }
 
 /* =========================================================
