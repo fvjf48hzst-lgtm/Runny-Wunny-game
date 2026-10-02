@@ -941,6 +941,17 @@ canvas.orangeMode {
 
 </div>
 
+<!-- =========================================================
+     BACKGROUND MUSIC
+     ========================================================= -->
+
+<audio
+    id="backgroundMusic"
+    src="background.m4a"
+    loop
+    preload="auto"
+></audio>
+
 <script>
 
 const canvas =
@@ -1025,6 +1036,24 @@ const enemyStatus =
     document.getElementById(
         "enemyStatus"
     );
+
+/* =========================================================
+   BACKGROUND MUSIC
+   ========================================================= */
+
+const backgroundMusic =
+    document.getElementById(
+        "backgroundMusic"
+    );
+
+function playBackgroundMusic() {
+
+    backgroundMusic
+        .play()
+        .catch(
+            () => {}
+        );
+}
 
 const GRID_SIZE = 25;
 
@@ -1279,6 +1308,8 @@ function resetGame() {
 
     lastTime =
         performance.now();
+
+    playBackgroundMusic();
 }
 
 function showMainMenu() {
@@ -1328,6 +1359,8 @@ function startGame() {
 
     lastTime =
         performance.now();
+
+    playBackgroundMusic();
 }
 
 startButton.addEventListener(
